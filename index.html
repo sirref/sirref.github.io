@@ -42,76 +42,79 @@
 
 <body>
 
-    <div class="container">
-        <div class="row">
-            <div class="col text-center">
-                <p> War Timer</p>
+    <div class="row justify-content-center align-items-center min-vh-25">
+        <div class="col-6 text-center">
+            <div class="row justify-content-center align-items-center">
+                <div class="col text-center">
+                    <p> War Timer</p>
+                </div>
             </div>
-        </div>
-        <div class="row justify-content-center align-items-center">
-            <div class="col-sm-4 text-center">
-                <div class="card">
-                    <!--<div class="card-header">Stage</div>-->
-                    <div class="card-body">
-                        <p class="card-text" id="stage">#</p>
+            <div class="row justify-content-center align-items-center">
+                <div class="col-sm-4 text-center">
+                    <div class="card text-white bg-dark">
+                        <!--<div class="card-header">Stage</div>-->
+                        <div class="card-body">
+                            <p class="card-text" id="stage">#</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="row justify-content-center align-items-center">
-            <div class="col-sm-4 text-center">
-                <div class="card">
-                    <!--<div class="card-header"></div>-->
-                    <div class="card-body">
-                        <p class="card-text" id="timeRemaining">#</p>
+            <div class="row justify-content-center align-items-center">
+                <div class="col-sm-4 text-center">
+                    <div class="card text-white bg-dark">
+                        <!--<div class="card-header"></div>-->
+                        <div class="card-body">
+                            <p class="card-text" id="timeRemaining">#</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="row justify-content-center align-items-center">
-            <div class="col-sm-4 text-center">
-                <div class="card">
-                    <div class="card-body">
-                        <p class="card-text" id="timeToRespawn">Calculating time to respawn</p>
-                        <p class="card-text" id="nextRespawnTime"></p>
+            <div class="row justify-content-center align-items-center">
+                <div class="col-sm-4 text-center">
+                    <div class="card text-white bg-dark">
+                        <div class="card-body">
+                            <p class="card-text" id="timeToRespawn">Calculating time to respawn</p>
+                            <p class="card-text" id="nextRespawnTime"></p>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-sm-4 text-center">
-                <!--<div class="card">
+                <div class="col-sm-4 text-center">
+                    <!--<div class="card text-white bg-dark">
                     <div class="card-body"> -->
-                <p class="card-text">or</p>
-                <!--</div>
+                    <button id="jumpButton" class="btn btn-primary">Jumped</button>
+                    <!--</div>
                 </div>-->
-            </div>
-            <div class="col-sm-4 text-center">
-                <div class="card">
-                    <div class="card-body">
-                        <p class="card-text" id="timeToRespawnJumped">jumped</p>
+                </div>
+                <div class="col-sm-4 text-center">
+                    <div class="card text-white bg-dark">
+                        <div class="card-body">
+                            <p class="card-text" id="timeToRespawnJumped"></p>
+                            <p class="card-text" id="nextJumpedRespawn"></p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="row justify-content-center align-items-center">
-            <div class="col-sm-4 text-center">
-                <div class="card">
-                    <div class="card-body">
-                        <p class="card-text" id="countRespawns">#</p>
+            <div class="row justify-content-center align-items-center">
+                <div class="col-sm-4 text-center">
+                    <div class="card text-white bg-dark">
+                        <div class="card-body">
+                            <p class="card-text" id="countRespawns"></p>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-sm-4  text-center">
-                <div class="card min-vh-10">
-                    <div class="card-body">
-                        <p class="card-text" id="phase"></p>
+                <div class="col-sm-4  text-center">
+                    <div class="card text-white bg-dark">
+                        <div class="card-body">
+                            <p class="card-text" id="phase"></p>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-sm-4  text-center">
-                <div class="card min-vh-10">
-                    <div class="card-body">
-                        <p class="card-text" id="timeToPhase"></p>
-                        <p class="card-text" id="nextPhaseTime"></p>
+                <div class="col-sm-4  text-center">
+                    <div class="card text-white bg-dark">
+                        <div class="card-body">
+                            <p class="card-text" id="timeToPhase"></p>
+                            <p class="card-text" id="nextPhaseTime"></p>
+                        </div>
                     </div>
                 </div>
             </div>

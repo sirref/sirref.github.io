@@ -60,10 +60,13 @@ let captureTimes = [];
 let timeRem = 0;
 let respawnTime = 0;
 let timeToRespawn = 0;
+let jumpedRespawnTime = 0;
+let timetoJumpedRespawn = 0;
 let phaseTime = 0;
 let timeToPhase = 0;
 let respawnsRemaining = 0;
 let userAdjustment = 0;
+let isJumped = false;
 
 // -----------------------------------------------------------------------------
 // Logic
@@ -135,6 +138,11 @@ function getNextRespawnTime(timeRemaining) {
     return -1;
 }
 
+function getNextJumpedRespawnTime(timeRemaining) {
+    const normalRespawnTime = getNextRespawnTime(timeRemaining);
+    return normalRespawnTime + JUMP_ADJUSTMENT;
+}
+
 function formatTime(seconds) {
     const minutesRemaining = Math.floor(seconds / 60);
     const secondsRemaining = seconds % 60;
@@ -147,6 +155,18 @@ function capitalizeFirst(str) {
 }
 
 // -----------------------------------------------------------------------------
+// Controls
+// -----------------------------------------------------------------------------
+const jumpedButton = document.getElementById("jumpButton");
+
+function OnJumpButtonClicked() {
+    console.log("Jump button pressed");
+}
+
+function SetUpEventListeners() {
+    jumpedButton.addEventListener('click', OnJumpButtonClicked);
+}
+// -----------------------------------------------------------------------------
 // MVC
 // -----------------------------------------------------------------------------
 const stageElement = document.getElementById("stage")
@@ -156,6 +176,8 @@ const nextPhaseTimeElement = document.getElementById("nextPhaseTime");
 const timeToPhaseElement = document.getElementById("timeToPhase");
 const nextRespawnTimeElement = document.getElementById("nextRespawnTime");
 const timeToRespawnElement = document.getElementById("timeToRespawn");
+const nextJumpedRespawnTimeElement = document.getElementById("nextJumpedRespawn");
+const timeToJumpRespawnElement = document.getElementById("timeToRespawnJumped");
 const countRespawnsElement = document.getElementById("countRespawns");
 
 function updateModel() {
@@ -168,13 +190,12 @@ function updateModel() {
     timeToPhase = timeRem - phaseTime;
     respawnTime = getNextRespawnTime(timeRem);
     timeToRespawn = respawnTime > 0 ? timeRem - respawnTime : -1;
+    jumpedRespawnTime = getNextJumpedRespawnTime(timeRem);
+    timetoJumpedRespawn = Math.max(timeRem - jumpedRespawnTime, 0);
     respawnsRemaining = getNumberRespawnsRemainingInPhase(timeRem);
 }
 
 function updateDisplay() {
-
-    console.log(respawnsRemaining);
-
     stageElement.textContent = `${capitalizeFirst(stage)}`;
     timeRemainingElement.textContent = `${formatTime(timeRem)}`;
 
@@ -185,9 +206,13 @@ function updateDisplay() {
         if (respawnTime > 0) {
             nextRespawnTimeElement.textContent = `${formatTime(respawnTime)}`;
             timeToRespawnElement.textContent = `${formatTime(timeToRespawn)}`;
+            nextJumpedRespawnTimeElement.textContent = `${formatTime(jumpedRespawnTime)}`;
+            timeToJumpRespawnElement.textContent = `${formatTime(timetoJumpedRespawn)}`;
         } else {
             nextRespawnTimeElement.textContent = NO_RESPAWNS_REMAINING;
-            timeToRespawnElement.textContent = ""
+            timeToRespawnElement.textContent = " "
+            nextJumpedRespawnTimeElement.textContent = NO_RESPAWNS_REMAINING;
+            timeToJumpRespawnElement.textContent = " ";
         }
         countRespawnsElement.textContent = `${respawnsRemaining}`;
     } else {
@@ -196,7 +221,9 @@ function updateDisplay() {
         timeToPhaseElement.textContent = " ";
         nextRespawnTimeElement.textContent = " ";
         timeToRespawnElement.textContent = " ";
+        nextJumpedRespawnTimeElement = " ";
         countRespawnsElement.textContent = " ";
+        timeToJumpRespawnElement.textContent = " "
     }
 
 }
@@ -206,7 +233,6 @@ function update() {
     updateDisplay();
 }
 
-
-
+SetUpEventListeners();
 setInterval(update, 1000);
 update(); // Initialize immediately
