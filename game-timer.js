@@ -8,13 +8,13 @@ const STAGES = Object.freeze({
 });
 
 const PHASES = Object.freeze({
-    NONE: "0",
-    PHASE1: "1",
-    PHASE2: "2",
-    PHASE3: "3",
-    PHASE4: "4",
-    PHASE5: "5",
-    PHASE6: "6"
+    PHASE1: 1,
+    PHASE2: 2,
+    PHASE3: 3,
+    PHASE4: 4,
+    PHASE5: 5,
+    PHASE6: 6,
+    NONE: 0,
 });
 
 const RESPAWN_TIMES = [
@@ -49,6 +49,7 @@ const MODE2_STAGES = {
 const JUMP_ADJUSTMENT = 8;
 
 const NO_RESPAWNS_REMAINING = "No respawns remaining"
+
 // -----------------------------------------------------------------------------
 // Variables
 // -----------------------------------------------------------------------------
@@ -59,6 +60,10 @@ let captureTimes = [];
 let timeRem = 0;
 let respawnTime = 0;
 let timeToRespawn = 0;
+let phaseTime = 0;
+let timeToPhase = 0;
+let respawnsRemaining = 0;
+let userAdjustment = 0;
 
 // -----------------------------------------------------------------------------
 // Logic
@@ -87,6 +92,10 @@ function getCurrentPhase(timeRemaining) {
     return PHASES.NONE;
 }
 
+function getPhaseTime(timeRemaining) {
+    const phase = getCurrentPhase(timeRemaining);
+    return PHASE_TIMES[phase - 1] || 0;
+}
 
 function getTimeRemainingInStage(secondsIntoHour) {
     const stage = getCurrentStage(secondsIntoHour)
@@ -97,6 +106,23 @@ function getTimeRemainingInStage(secondsIntoHour) {
     } else if (stage == STAGES.BREAK) {
         return mode.BREAK_END - secondsIntoHour;
     }
+}
+
+function getNumberRespawnsRemainingInPhase(timeRemaining) {
+    const phase = getCurrentPhase(timeRemaining);
+    // Find the current phase based on the time remaining
+    let currentPhaseIndex = phase - 1;
+
+    // If no phase matches, return 0 (no respawns left)
+    if (currentPhaseIndex === -1) return 0;
+
+    // Get the start and end times of the current phase
+    const phaseEnd = PHASE_TIMES[currentPhaseIndex];
+
+    // Count respawns within the current phase and still valid for timeRemaining
+    return RESPAWN_TIMES.filter(
+        (time) => time < timeRemaining && time >= phaseEnd
+    ).length;
 }
 
 function getNextRespawnTime(timeRemaining) {
@@ -112,21 +138,25 @@ function getNextRespawnTime(timeRemaining) {
 function formatTime(seconds) {
     const minutesRemaining = Math.floor(seconds / 60);
     const secondsRemaining = seconds % 60;
-    return `${minutesRemaining}:${secondsRemaining.toString().padStart(2, '0')}`;
+    return `${minutesRemaining}: ${secondsRemaining.toString().padStart(2, '0')}`;
 }
 
 function capitalizeFirst(str) {
     if (!str) return ''; // Handle empty or undefined strings
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
 // -----------------------------------------------------------------------------
 // MVC
 // -----------------------------------------------------------------------------
 const stageElement = document.getElementById("stage")
 const phaseElement = document.getElementById("phase");
 const timeRemainingElement = document.getElementById("timeRemaining");
-const nextRespawnTimeElement = document.getElementById("nextRespawnTime")
-const timeToRespawnElement = document.getElementById("timeToRespawn")
+const nextPhaseTimeElement = document.getElementById("nextPhaseTime");
+const timeToPhaseElement = document.getElementById("timeToPhase");
+const nextRespawnTimeElement = document.getElementById("nextRespawnTime");
+const timeToRespawnElement = document.getElementById("timeToRespawn");
+const countRespawnsElement = document.getElementById("countRespawns");
 
 function updateModel() {
     const timeInSeconds = getCurrentTimeInSeconds();
@@ -134,9 +164,11 @@ function updateModel() {
     timeRem = getTimeRemainingInStage(timeInSeconds);
 
     phase = getCurrentPhase(timeRem);
+    phaseTime = getPhaseTime(timeRem);
+    timeToPhase = timeRem - phaseTime;
     respawnTime = getNextRespawnTime(timeRem);
     timeToRespawn = respawnTime > 0 ? timeRem - respawnTime : -1;
-
+    respawnsRemaining = getNumberRespawnsRemainingInPhase(timeRem);
 }
 
 function updateDisplay() {
@@ -144,7 +176,9 @@ function updateDisplay() {
     timeRemainingElement.textContent = `${formatTime(timeRem)}`;
 
     if (stage == STAGES.WAR) {
-        phaseElement.textContent = `${capitalizeFirst(phase)}`;
+        phaseElement.textContent = `${phase}`;
+        nextPhaseTimeElement.textContent = `${formatTime(phaseTime)}`;
+        timeToPhaseElement.textContent = `${formatTime(timeToPhase)}`;
         if (respawnTime > 0) {
             nextRespawnTimeElement.textContent = `${formatTime(respawnTime)}`;
             timeToRespawnElement.textContent = `${formatTime(timeToRespawn)}`;
@@ -152,10 +186,14 @@ function updateDisplay() {
             nextRespawnTimeElement.textContent = NO_RESPAWNS_REMAINING;
             timeToRespawnElement.textContent = ""
         }
+        countRespawnsElement.textContent = `${respawnsRemaining}`;
     } else {
         phaseElement.textContent = ""
+        nextPhaseTimeElement.textContent = "";
+        timeToPhaseElement.textContent = "";
         nextRespawnTimeElement.textContent = "";
         timeToRespawnElement.textContent = "";
+        countRespawnsElement.textContent = "";
     }
 
 }
