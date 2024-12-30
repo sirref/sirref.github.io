@@ -172,6 +172,9 @@ function updateModel() {
 }
 
 function updateDisplay() {
+
+    console.log(respawnsRemaining);
+
     stageElement.textContent = `${capitalizeFirst(stage)}`;
     timeRemainingElement.textContent = `${formatTime(timeRem)}`;
 
@@ -188,12 +191,12 @@ function updateDisplay() {
         }
         countRespawnsElement.textContent = `${respawnsRemaining}`;
     } else {
-        phaseElement.textContent = ""
-        nextPhaseTimeElement.textContent = "";
-        timeToPhaseElement.textContent = "";
-        nextRespawnTimeElement.textContent = "";
-        timeToRespawnElement.textContent = "";
-        countRespawnsElement.textContent = "";
+        phaseElement.textContent = " "
+        nextPhaseTimeElement.textContent = " ";
+        timeToPhaseElement.textContent = " ";
+        nextRespawnTimeElement.textContent = " ";
+        timeToRespawnElement.textContent = " ";
+        countRespawnsElement.textContent = " ";
     }
 
 }
