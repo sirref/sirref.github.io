@@ -1,85 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Game Timer</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin-top: 10%;
-    }
-    #timer {
-      font-size: 2rem;
-      font-weight: bold;
-      margin-top: 20px;
-    }
-    #status {
-      font-size: 1.5rem;
-      color: #555;
-    }
-  </style>
-</head>
-<body>
-  <h1>Game Timer</h1>
-  <div id="status">Preparing for game...</div>
-  <div id="timer">Loading...</div>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Timer</title>
 
-  <script>
-    function startGameTimer() {
-      const now = new Date();
-      const currentMinutes = now.getMinutes();
-      const currentSeconds = now.getSeconds();
-      const secondsUntilNextHour = (60 - currentMinutes) * 60 - currentSeconds;
-
-      // Prep phase starts 15 minutes before the hour
-      let prepTime = secondsUntilNextHour - 15 * 60;
-      if (prepTime < 0) {
-        prepTime += 60 * 60; // Adjust for past the top of the hour
-      }
-
-      const gameDuration = 30 * 60; // 30 minutes in seconds
-      const prepDuration = 15 * 60; // 15 minutes in seconds
-
-      let remainingTime = prepTime + prepDuration + gameDuration;
-
-      const timerElement = document.getElementById('timer');
-      const statusElement = document.getElementById('status');
-
-      function updateTimer() {
-        if (remainingTime > 0) {
-          remainingTime--;
-          let phase;
-          let timeToShow = remainingTime;
-
-          if (timeToShow > gameDuration + prepDuration) {
-            phase = 'Waiting for prep phase...';
-            timeToShow -= gameDuration + prepDuration;
-          } else if (timeToShow > gameDuration) {
-            phase = 'Prep phase:';
-            timeToShow -= gameDuration;
-          } else {
-            phase = 'Game phase:';
-          }
-
-          const minutes = Math.floor(timeToShow / 60).toString().padStart(2, '0');
-          const seconds = (timeToShow % 60).toString().padStart(2, '0');
-          statusElement.textContent = phase;
-          timerElement.textContent = `${minutes}:${seconds}`;
-        } else {
-          statusElement.textContent = 'Game Over!';
-          timerElement.textContent = '00:00';
-          clearInterval(timerInterval);
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 5%;
         }
-      }
 
-      const timerInterval = setInterval(updateTimer, 1000);
-      updateTimer(); // Initial call to set the timer immediately
-    }
+        table {
+            width: 50%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
 
-    // Start the timer when the page loads
-    startGameTimer();
-  </script>
+        table,
+        th,
+        td {
+            border: 1px solid #ccc;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Game Timer</h1>
+    <table>
+        <tr>
+            <th>Stage</th>
+            <td id="stage"></td>
+        </tr>
+        <tr>
+            <th>Phase</th>
+            <td id="phase"></td>
+        </tr>
+        <tr>
+            <th>Time Remaining</th>
+            <td id="timeRemaining">Calculating time remaining</td>
+        </tr>
+        <tr>
+            <th>Next Respawn Time</th>
+            <td id="nextRespawnTime"></td>
+        </tr>
+        <tr>
+            <th>Time to Respawn</th>
+            <td id="timeToRespawn">Calculating next respawn</td>
+        </tr>
+    </table>
+
+    <script src="game-timer.js"></script>
 </body>
+
 </html>
