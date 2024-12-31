@@ -26,6 +26,8 @@ const RESPAWN_TIMES = [
     110, 50
 ];
 
+const TIME_BETWEEN_RESPAWNS = [20, 28, 36, 44, 52, 60];
+
 const PHASE_TIMES = [1500, 1184, 860, 550, 290, 50];
 
 const MODE1_STAGES = {
@@ -67,7 +69,7 @@ let timeToPhase = 0;
 let respawnsRemaining = 0;
 let userAdjustment = 0;
 let isJumped = false;
-
+let timeBetweenRespawn = 0;
 // -----------------------------------------------------------------------------
 // Logic
 // -----------------------------------------------------------------------------
@@ -98,6 +100,10 @@ function getCurrentPhase(timeRemaining) {
 function getPhaseTime(timeRemaining) {
     const phase = getCurrentPhase(timeRemaining);
     return PHASE_TIMES[phase - 1] || 0;
+}
+
+function getTimeBetweenRespawns(phase) {
+    return TIME_BETWEEN_RESPAWNS[phase - 1];
 }
 
 function getTimeRemainingInStage(secondsIntoHour) {
@@ -165,6 +171,7 @@ function capitalizeFirst(str) {
 // -----------------------------------------------------------------------------
 const jumpedButton = document.getElementById("jumpButton");
 const altTimersCheck = document.getElementById("checkAltTimer");
+const volumeSlider = document.getElementById("volumeSlider");
 
 function OnJumpButtonClicked() {
     console.log("Jump button pressed");
@@ -187,9 +194,15 @@ function OnAltTimerCheckClicked() {
     }
 }
 
+function OnVolumeSliderChanged() {
+    beepAudio.volume = (volumeSlider.value / 100.0);
+    respawnAudio.volume = (volumeSlider.value / 100.0);
+}
+
 function SetUpEventListeners() {
     jumpedButton.addEventListener('click', OnJumpButtonClicked);
     altTimersCheck.addEventListener('click', OnAltTimerCheckClicked);
+    volumeSlider.addEventListener('input', OnVolumeSliderChanged)
 }
 // -----------------------------------------------------------------------------
 // MVC
@@ -204,9 +217,13 @@ const timeToRespawnElement = document.getElementById("timeToRespawn");
 const nextJumpedRespawnTimeElement = document.getElementById("nextJumpedRespawn");
 const timeToJumpRespawnElement = document.getElementById("timeToRespawnJumped");
 const countRespawnsElement = document.getElementById("countRespawns");
-
 const respawnBoxElement = document.getElementById("respawnBox");
 const jumpedBoxElement = document.getElementById("jumpedBox");
+const timeBetweenRespawnElement = document.getElementById("timeBetweenRespawn");
+
+
+const beepAudio = document.getElementById("beep");
+const respawnAudio = document.getElementById("respawn");
 
 function updateModel() {
     const timeInSeconds = getCurrentTimeInSeconds();
@@ -221,11 +238,14 @@ function updateModel() {
     jumpedRespawnTime = getNextJumpedRespawnTime(timeRem);
     timetoJumpedRespawn = Math.max(timeRem - jumpedRespawnTime, 0);
     respawnsRemaining = getNumberRespawnsRemainingInPhase(timeRem);
+    timeBetweenRespawn = getTimeBetweenRespawns(phase);
 }
 
 function updateDisplay() {
     stageElement.textContent = `${capitalizeFirst(stage)}`;
     timeRemainingElement.textContent = `${formatTime(timeRem)}`;
+
+    console.log(timeToRespawn);
 
     if (stage == STAGES.WAR) {
         phaseElement.textContent = `${phase}`;
@@ -247,11 +267,22 @@ function updateDisplay() {
         if (isJumped) {
             respawnBoxElement.classList.add("disabled");
             jumpedBoxElement.classList.remove("disabled");
+            if (1 < timetoJumpedRespawn && timetoJumpedRespawn <= 4) {
+                beepAudio.play();
+            } else if (timetoJumpedRespawn == 1) {
+                respawnAudio.play();
+            }
         } else {
             respawnBoxElement.classList.remove("disabled");
             jumpedBoxElement.classList.add("disabled");
+            if (1 < timeToRespawn && timeToRespawn <= 4) {
+                beepAudio.play();
+            } else if (timeToRespawn == 1) {
+                respawnAudio.play();
+            }
         }
 
+        timeBetweenRespawnElement.textContent = `${timeBetweenRespawn}s`;
     } else {
         phaseElement.textContent = " "
         nextPhaseTimeElement.textContent = " ";
@@ -261,6 +292,7 @@ function updateDisplay() {
         nextJumpedRespawnTimeElement.textContent = " ";
         countRespawnsElement.textContent = " ";
         timeToJumpRespawnElement.textContent = " "
+        timeBetweenRespawnElement.textContent = " ";
     }
 
 }
