@@ -145,8 +145,12 @@ function getNextRespawnTime(timeRemaining) {
     return -1;
 }
 
-function getNextJumpedRespawnTime(timeRemaining) {
+function getNextJumpedRespawnTime(timeRemaining, phase) {
     const normalRespawnTime = getNextRespawnTime(timeRemaining);
+    if (phase == PHASES.PHASE1) {
+        return normalRespawnTime;
+    }
+
 
     if (timeRem - normalRespawnTime > JUMP_ADJUSTMENT) {
         return normalRespawnTime + JUMP_ADJUSTMENT;
@@ -188,9 +192,11 @@ function OnJumpButtonClicked() {
     isJumped = !isJumped;
 
     if (isJumped) {
+        jumpedButton.textContent = "Switch to Normal";
         respawnBoxElement.classList.add("disabled");
         jumpedBoxElement.classList.remove("disabled");
     } else {
+        jumpedButton.textContent = "Switch to Jumped";
         respawnBoxElement.classList.remove("disabled");
         jumpedBoxElement.classList.add("disabled");
     }
@@ -278,7 +284,7 @@ function updateModel() {
     timeToPhase = timeRem - phaseTime;
     respawnTime = getNextRespawnTime(timeRem);
     timeToRespawn = respawnTime > 0 ? timeRem - respawnTime : -1;
-    jumpedRespawnTime = getNextJumpedRespawnTime(timeRem);
+    jumpedRespawnTime = getNextJumpedRespawnTime(timeRem, phase);
     timetoJumpedRespawn = Math.max(timeRem - jumpedRespawnTime, 0);
     respawnsRemaining = getNumberRespawnsRemainingInPhase(timeRem);
     timeBetweenRespawn = getTimeBetweenRespawns(phase);
