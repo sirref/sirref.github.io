@@ -47,7 +47,7 @@
 
     <div class="container">
         <!-- First Row -->
-        <div class="row d-flex justify-content-center align-items-center pt-3">
+        <div class="row d-flex justify-content-center align-items-center">
             <div class="col-4 text-center">
                 <div class="time-box h-100 d-flex flex-column justify-content-center align-items-center">
                     <div class="d-flex justify-content-center align-items-center">
@@ -55,7 +55,17 @@
                         <div class="box-label ms-2">Time</div>
                     </div>
                     <span id="timeRemaining" class="mt-2">Time Remaining</span>
+                    <div class="sublabel" id="nudge"></div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="row d-flex justify-content-center align-items-stretch pb-3">
+            <div class="col-3 text-center d-flex justify-content-center">
+                <button id="adjustMinus" class="btn btn-primary btn-sm flex-grow-1 mx-1">-</button>
+                <button id="adjustReset" class="btn btn-primary btn-sm flex-grow-1 mx-1">Reset</button>
+                <button id="adjustPlus" class="btn btn-primary btn-sm flex-grow-1 mx-1">+</button>
             </div>
         </div>
 
@@ -133,16 +143,16 @@
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" value="" id="checkAltTimer">
                     <label class="form-check-label" for="flexCheckDefault">
-                        Switch to :30 timers
+                        Switch to XX:30 war timer
                     </label>
                 </div>
             </div>
         </div>
         <div class="row d-flex justify-content-end align-items-center pt-3">
             <div class="col-3 d-flex align-items-center">
-                <i class="bi bi-volume-up me-3" style="font-size: 1.5rem;"></i>
+                <i class="bi bi-volume-up me-3" style="font-size: 1.5rem;" id="speakerIcon"></i>
                 <div>
-                    <input type="range" class="form-range" id="volumeSlider" min="0" max="100" step="5" value="50">
+                    <input type="range" class="form-range" id="volumeSlider" min="0" max="100" step="5" value="0">
                 </div>
             </div>
         </div>

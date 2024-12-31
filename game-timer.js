@@ -70,12 +70,13 @@ let respawnsRemaining = 0;
 let userAdjustment = 0;
 let isJumped = false;
 let timeBetweenRespawn = 0;
+
 // -----------------------------------------------------------------------------
 // Logic
 // -----------------------------------------------------------------------------
 function getCurrentTimeInSeconds() {
     const now = new Date();
-    return now.getMinutes() * 60 + now.getSeconds();
+    return now.getMinutes() * 60 + now.getSeconds() - userAdjustment;
 }
 
 function getCurrentStage(secondsIntoHour) {
@@ -161,6 +162,12 @@ function formatTime(seconds) {
     return `${minutesRemaining}:${secondsRemaining.toString().padStart(2, '0')}`;
 }
 
+function formatAdjustmentTime(seconds) {
+    const formattedTime = formatTime(Math.abs(seconds));
+    const sign = seconds >= 0 ? "+" : "-";
+    return sign + formattedTime;
+}
+
 function capitalizeFirst(str) {
     if (!str) return ''; // Handle empty or undefined strings
     return str.charAt(0).toUpperCase() + str.slice(1);
@@ -172,6 +179,9 @@ function capitalizeFirst(str) {
 const jumpedButton = document.getElementById("jumpButton");
 const altTimersCheck = document.getElementById("checkAltTimer");
 const volumeSlider = document.getElementById("volumeSlider");
+const nudgePlus = document.getElementById("adjustPlus");
+const nudgeMinus = document.getElementById("adjustMinus");
+const nudgeReset = document.getElementById("adjustReset");
 
 function OnJumpButtonClicked() {
     console.log("Jump button pressed");
@@ -195,14 +205,42 @@ function OnAltTimerCheckClicked() {
 }
 
 function OnVolumeSliderChanged() {
-    beepAudio.volume = (volumeSlider.value / 100.0);
-    respawnAudio.volume = (volumeSlider.value / 100.0);
+    const newVolume = volumeSlider.value / 100.0;
+    beepAudio.volume = newVolume;
+    respawnAudio.volume = newVolume;
+
+    if (newVolume <= 1e-3) {
+        speakerIconElement.classList = SPEAKER_MUTE;
+    } else if (newVolume <= 0.5) {
+        speakerIconElement.classList = SPEAKER_VOL_LOW;
+    } else {
+        speakerIconElement.classList = SPEAKER_VOL_HIGH;
+    }
+
+}
+
+function OnNudgeMinusClicked() {
+    userAdjustment -= 1;
+    update();
+}
+
+function OnNudgePlusClicked() {
+    userAdjustment += 1;
+    update();
+}
+
+function OnNudgeResetClicked() {
+    userAdjustment = 0;
+    update();
 }
 
 function SetUpEventListeners() {
     jumpedButton.addEventListener('click', OnJumpButtonClicked);
     altTimersCheck.addEventListener('click', OnAltTimerCheckClicked);
     volumeSlider.addEventListener('input', OnVolumeSliderChanged)
+    nudgeMinus.addEventListener('click', OnNudgeMinusClicked);
+    nudgePlus.addEventListener('click', OnNudgePlusClicked);
+    nudgeReset.addEventListener('click', OnNudgeResetClicked);
 }
 // -----------------------------------------------------------------------------
 // MVC
@@ -220,10 +258,15 @@ const countRespawnsElement = document.getElementById("countRespawns");
 const respawnBoxElement = document.getElementById("respawnBox");
 const jumpedBoxElement = document.getElementById("jumpedBox");
 const timeBetweenRespawnElement = document.getElementById("timeBetweenRespawn");
-
+const nudgeElement = document.getElementById("nudge")
 
 const beepAudio = document.getElementById("beep");
 const respawnAudio = document.getElementById("respawn");
+const speakerIconElement = document.getElementById("speakerIcon");
+
+const SPEAKER_MUTE = "bi bi-volume-mute";
+const SPEAKER_VOL_HIGH = "bi bi-volume-up";
+const SPEAKER_VOL_LOW = "bi bi-volume-down";
 
 function updateModel() {
     const timeInSeconds = getCurrentTimeInSeconds();
@@ -251,6 +294,7 @@ function updateDisplay() {
         phaseElement.textContent = `${phase}`;
         nextPhaseTimeElement.textContent = `${formatTime(phaseTime)}`;
         timeToPhaseElement.textContent = `${formatTime(timeToPhase)}`;
+        nudgeElement.textContent = `${formatAdjustmentTime(userAdjustment)}`;
         if (respawnTime > 0) {
             nextRespawnTimeElement.textContent = `${formatTime(respawnTime)}`;
             timeToRespawnElement.textContent = `${formatTime(timeToRespawn)}`;
@@ -293,6 +337,7 @@ function updateDisplay() {
         countRespawnsElement.textContent = " ";
         timeToJumpRespawnElement.textContent = " "
         timeBetweenRespawnElement.textContent = " ";
+        nudgeElement.textContent = "";
     }
 
 }
@@ -301,6 +346,10 @@ function update() {
     updateModel();
     updateDisplay();
 }
+
+beepAudio.volume = 0;
+respawnAudio.volume = 0;
+speakerIconElement.classList = SPEAKER_MUTE;
 
 SetUpEventListeners();
 setInterval(update, 1000);
