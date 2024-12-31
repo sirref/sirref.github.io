@@ -146,7 +146,7 @@ function getNextJumpedRespawnTime(timeRemaining) {
 function formatTime(seconds) {
     const minutesRemaining = Math.floor(seconds / 60);
     const secondsRemaining = seconds % 60;
-    return `${minutesRemaining}: ${secondsRemaining.toString().padStart(2, '0')}`;
+    return `${minutesRemaining}:${secondsRemaining.toString().padStart(2, '0')}`;
 }
 
 function capitalizeFirst(str) {
@@ -161,6 +161,15 @@ const jumpedButton = document.getElementById("jumpButton");
 
 function OnJumpButtonClicked() {
     console.log("Jump button pressed");
+    isJumped = !isJumped;
+
+    if (isJumped) {
+        respawnBoxElement.classList.add("disabled");
+        jumpedBoxElement.classList.remove("disabled");
+    } else {
+        respawnBoxElement.classList.remove("disabled");
+        jumpedBoxElement.classList.add("disabled");
+    }
 }
 
 function SetUpEventListeners() {
@@ -179,6 +188,9 @@ const timeToRespawnElement = document.getElementById("timeToRespawn");
 const nextJumpedRespawnTimeElement = document.getElementById("nextJumpedRespawn");
 const timeToJumpRespawnElement = document.getElementById("timeToRespawnJumped");
 const countRespawnsElement = document.getElementById("countRespawns");
+
+const respawnBoxElement = document.getElementById("respawnBox");
+const jumpedBoxElement = document.getElementById("jumpedBox");
 
 function updateModel() {
     const timeInSeconds = getCurrentTimeInSeconds();
@@ -215,13 +227,22 @@ function updateDisplay() {
             timeToJumpRespawnElement.textContent = " ";
         }
         countRespawnsElement.textContent = `${respawnsRemaining}`;
+
+        if (isJumped) {
+            respawnBoxElement.classList.add("disabled");
+            jumpedBoxElement.classList.remove("disabled");
+        } else {
+            respawnBoxElement.classList.remove("disabled");
+            jumpedBoxElement.classList.add("disabled");
+        }
+
     } else {
         phaseElement.textContent = " "
         nextPhaseTimeElement.textContent = " ";
         timeToPhaseElement.textContent = " ";
         nextRespawnTimeElement.textContent = " ";
         timeToRespawnElement.textContent = " ";
-        nextJumpedRespawnTimeElement = " ";
+        nextJumpedRespawnTimeElement.textContent = " ";
         countRespawnsElement.textContent = " ";
         timeToJumpRespawnElement.textContent = " "
     }
