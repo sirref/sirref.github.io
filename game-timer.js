@@ -140,7 +140,13 @@ function getNextRespawnTime(timeRemaining) {
 
 function getNextJumpedRespawnTime(timeRemaining) {
     const normalRespawnTime = getNextRespawnTime(timeRemaining);
-    return normalRespawnTime + JUMP_ADJUSTMENT;
+
+    if (timeRem - normalRespawnTime > JUMP_ADJUSTMENT) {
+        return normalRespawnTime + JUMP_ADJUSTMENT;
+    }
+
+    const nextRespawnTime = getNextRespawnTime(normalRespawnTime);
+    return nextRespawnTime + JUMP_ADJUSTMENT;
 }
 
 function formatTime(seconds) {
@@ -158,6 +164,7 @@ function capitalizeFirst(str) {
 // Controls
 // -----------------------------------------------------------------------------
 const jumpedButton = document.getElementById("jumpButton");
+const altTimersCheck = document.getElementById("checkAltTimer");
 
 function OnJumpButtonClicked() {
     console.log("Jump button pressed");
@@ -172,8 +179,17 @@ function OnJumpButtonClicked() {
     }
 }
 
+function OnAltTimerCheckClicked() {
+    if (altTimersCheck.checked) {
+        mode = MODE2_STAGES;
+    } else {
+        mode = MODE1_STAGES;
+    }
+}
+
 function SetUpEventListeners() {
     jumpedButton.addEventListener('click', OnJumpButtonClicked);
+    altTimersCheck.addEventListener('click', OnAltTimerCheckClicked);
 }
 // -----------------------------------------------------------------------------
 // MVC
