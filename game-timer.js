@@ -76,7 +76,7 @@ let volume = 0;
 // -----------------------------------------------------------------------------
 function getCurrentTimeInSeconds() {
     const now = new Date();
-    return now.getMinutes() * 60 + now.getSeconds() - userAdjustment;
+    return now.getMinutes() * 60 + now.getSeconds() + userAdjustment;
 }
 
 function getCurrentStage(secondsIntoHour) {
@@ -357,9 +357,10 @@ function updateArrows() {
 function updateDisplay() {
     stageElement.textContent = `${capitalizeFirst(stage)}`;
     timeRemainingElement.textContent = `${formatTime(timeRem)}`;
+    nudgeElement.textContent = `${formatAdjustmentTime(userAdjustment)}`;
 
     if (stage == STAGES.WAR) {
-        phaseElement.textContent = `${phase}`;
+        phaseElement.textContent = `Phase ${phase} of ${PHASE_TIMES.length}`;
 
         if (timeToPhase > 0) {
             nextPhaseTimeElement.textContent = `${formatTime(phaseTime)}`;
@@ -368,7 +369,7 @@ function updateDisplay() {
             nextPhaseTimeElement.textContent = `${formatTime(0)}`;
             timeToPhaseElement.textContent = `${formatTime(0)}`;
         }
-        nudgeElement.textContent = `${formatAdjustmentTime(userAdjustment)}`;
+
         if (respawnTime > 0) {
             nextRespawnTimeElement.textContent = `${formatTime(respawnTime)}`;
             timeToRespawnElement.textContent = `${formatTime(timeToRespawn)}`;
@@ -405,21 +406,60 @@ function updateDisplay() {
         } else {
             timeBetweenRespawnElement.textContent = "";
         }
+
+
+        showControl(phaseElement);
+        showControl(nextPhaseTimeElement);
+        showControl(timeToPhaseElement);
+        showControl(nextRespawnTimeElement);
+        showControl(timeToRespawnElement);
+        showControl(nextJumpedRespawnTimeElement);
+        showControl(countRespawnsElement);
+        showControl(timeToJumpRespawnElement);
+        showControl(timeBetweenRespawnElement);
+        showControl(arrowLeft);
+        showControl(arrowRight);
+        showControl(jumpedButton);
     } else {
-        phaseElement.textContent = " "
-        nextPhaseTimeElement.textContent = " ";
-        timeToPhaseElement.textContent = " ";
-        nextRespawnTimeElement.textContent = " ";
-        timeToRespawnElement.textContent = " ";
-        nextJumpedRespawnTimeElement.textContent = " ";
-        countRespawnsElement.textContent = " ";
-        timeToJumpRespawnElement.textContent = " "
-        timeBetweenRespawnElement.textContent = " ";
-        nudgeElement.textContent = "";
-        arrowLeft.classList = "";
-        arrowRight.classList = "";
+        hideControl(phaseElement);
+        hideControl(nextPhaseTimeElement);
+        hideControl(timeToPhaseElement);
+        hideControl(nextRespawnTimeElement);
+        hideControl(timeToRespawnElement);
+        hideControl(nextJumpedRespawnTimeElement);
+        hideControl(countRespawnsElement);
+        hideControl(timeToJumpRespawnElement);
+        hideControl(timeBetweenRespawnElement);
+        hideControl(arrowLeft);
+        hideControl(arrowRight);
+        hideControl(jumpedButton);
     }
 
+}
+
+function disableControls() {
+    nudgeMinus.classList.add("disabled");
+    nudgePlus.classList.add("disabled");
+    nudgeReset.classList.add("disabled");
+
+    jumpedButton.classList.add("disababled");
+}
+
+function enableControls() {
+    nudgeMinus.classList.remove("disabled");
+    nudgePlus.classList.remove("disabled");
+    nudgeReset.classList.remove("disabled");
+
+    jumpedButton.classList.remove("disababled");
+}
+
+
+function hideControl(control) {
+    control.classList.add("invisible");
+}
+
+function showControl(control) {
+    control.classList.remove("invisible");
 }
 
 function update() {
