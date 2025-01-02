@@ -104,7 +104,7 @@ function getPhaseTime(timeRemaining) {
 }
 
 function getTimeBetweenRespawns(phase) {
-    if (TIME_BETWEEN_RESPAWNS.length < phase) {
+    if (phase < TIME_BETWEEN_RESPAWNS.length) {
         return TIME_BETWEEN_RESPAWNS[phase - 1];
     }
     return 0;
@@ -139,7 +139,7 @@ function getNumberRespawnsRemainingInPhase(timeRemaining) {
 
 function getNextRespawnTime(timeRemaining) {
     for (let i = 0; i < RESPAWN_TIMES.length; i++) {
-        if (RESPAWN_TIMES[i] < timeRemaining) {
+        if (RESPAWN_TIMES[i] <= timeRemaining) {
             return RESPAWN_TIMES[i];
         }
     }
@@ -153,12 +153,15 @@ function getNextJumpedRespawnTime(timeRemaining, phase) {
         return normalRespawnTime;
     }
 
+    if (isLastRespawnInPhase(timeRemaining, phase)) {
+        return normalRespawnTime;
+    }
 
-    if (timeRem - normalRespawnTime > JUMP_ADJUSTMENT) {
+    if (timeRem - normalRespawnTime >= JUMP_ADJUSTMENT) {
         return normalRespawnTime + JUMP_ADJUSTMENT;
     }
 
-    const nextRespawnTime = getNextRespawnTime(normalRespawnTime);
+    const nextRespawnTime = getNextRespawnTime(normalRespawnTime - 1);
     return nextRespawnTime + JUMP_ADJUSTMENT;
 }
 
@@ -181,8 +184,17 @@ function capitalizeFirst(str) {
 
 function updateAudioVolume(value) {
     const newVolume = value / 100.0;
-
 }
+
+function isLastRespawnInPhase(timeRemaining, phase) {
+    const timeBetween = getTimeBetweenRespawns(phase);
+    const phaseTime = getPhaseTime(timeRemaining);
+
+    const timeToPhase = timeRemaining - phaseTime;
+
+    return timeToPhase <= timeBetween;
+}
+
 // -----------------------------------------------------------------------------
 // Controls
 // -----------------------------------------------------------------------------
@@ -373,17 +385,17 @@ function updateDisplay() {
         if (isJumped) {
             respawnBoxElement.classList.add("disabled");
             jumpedBoxElement.classList.remove("disabled");
-            if (1 < timetoJumpedRespawn && timetoJumpedRespawn <= 4) {
+            if (0 < timetoJumpedRespawn && timetoJumpedRespawn <= 3) {
                 beepAudio.play();
-            } else if (timetoJumpedRespawn == 1) {
+            } else if (timetoJumpedRespawn == 0) {
                 respawnAudio.play();
             }
         } else {
             respawnBoxElement.classList.remove("disabled");
             jumpedBoxElement.classList.add("disabled");
-            if (1 < timeToRespawn && timeToRespawn <= 4) {
+            if (0 < timeToRespawn && timeToRespawn <= 3) {
                 beepAudio.play();
-            } else if (timeToRespawn == 1) {
+            } else if (timeToRespawn == 0) {
                 respawnAudio.play();
             }
         }
