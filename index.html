@@ -71,22 +71,31 @@
 
         <!-- Second Row -->
         <div class="row min-vh-25 d-flex justify-content-center align-items-stretch">
-            <div class="col-4 text-center">
+            <div class="col-3 text-center">
                 <div class="time-box h-100" id="respawnBox">
                     <div class="box-label">Time to Respawn</div>
                     <span id="timeToRespawn"></span>
                 </div>
             </div>
+            <!-- Left Arrow -->
+            <div class="col-1 d-flex justify-content-center align-items-center">
+                <i class="bi bi-arrow-left arrow" id="arrowLeft"></i>
+            </div>
             <div class="col-2 d-flex align-items-center justify-content-center">
                 <button id="jumpButton" class="btn btn-primary">Switch to Jumped</button>
             </div>
-            <div class="col-4 text-center">
+            <!-- Right Arrow -->
+            <div class="col-1 d-flex justify-content-center align-items-center">
+                <i class="bi bi-arrow-right arrow" id="arrowRight"></i>
+            </div>
+            <div class="col-3 text-center">
                 <div class="time-box h-100" id="jumpedBox">
                     <div class="box-label">Jumped Time to Respawn</div>
                     <span id="timeToRespawnJumped"></span>
                 </div>
             </div>
         </div>
+
 
         <!-- Third Row -->
         <div class="row pb-3 pt-3 d-flex justify-content-center align-items-stretch">
@@ -124,7 +133,6 @@
                     </div>
                     <div class="d-flex justify-content-center align-items-center">
                         <div class="box-label" id="timeBetweenRespawn"></div>
-                        <div class="box-label ms-1">respawns</div>
                     </div>
                 </div>
             </div>
@@ -150,7 +158,9 @@
         </div>
         <div class="row d-flex justify-content-end align-items-center pt-3">
             <div class="col-3 d-flex align-items-center">
-                <i class="bi bi-volume-up me-3" style="font-size: 1.5rem;" id="speakerIcon"></i>
+                <button id="muteButton" class="btn btn-secondary me-1" aria-label="Mute/Unmute">
+                    <i id="speakerIcon" class="bi bi-volume-up"></i>
+                </button>
                 <div>
                     <input type="range" class="form-range" id="volumeSlider" min="0" max="100" step="5" value="0">
                 </div>

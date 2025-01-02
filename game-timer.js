@@ -40,8 +40,8 @@ const MODE1_STAGES = {
 };
 
 const MODE2_STAGES = {
-    PREP_START: 2700,
-    PREP_END: 900,
+    PREP_START: 900,
+    PREP_END: 1800,
     WAR_START: 1800,
     WAR_END: 3600,
     BREAK_START: 0,
@@ -70,7 +70,7 @@ let respawnsRemaining = 0;
 let userAdjustment = 0;
 let isJumped = false;
 let timeBetweenRespawn = 0;
-
+let volume = 0;
 // -----------------------------------------------------------------------------
 // Logic
 // -----------------------------------------------------------------------------
@@ -95,7 +95,7 @@ function getCurrentPhase(timeRemaining) {
             return PHASES[`PHASE${i + 1}`];
         }
     }
-    return PHASES.NONE;
+    return PHASES.PHASE6;
 }
 
 function getPhaseTime(timeRemaining) {
@@ -104,11 +104,13 @@ function getPhaseTime(timeRemaining) {
 }
 
 function getTimeBetweenRespawns(phase) {
-    return TIME_BETWEEN_RESPAWNS[phase - 1];
+    if (TIME_BETWEEN_RESPAWNS.length < phase) {
+        return TIME_BETWEEN_RESPAWNS[phase - 1];
+    }
+    return 0;
 }
 
-function getTimeRemainingInStage(secondsIntoHour) {
-    const stage = getCurrentStage(secondsIntoHour)
+function getTimeRemainingInStage(secondsIntoHour, stage) {
     if (stage == STAGES.PREP) {
         return mode.PREP_END - secondsIntoHour;
     } else if (stage == STAGES.WAR) {
@@ -177,6 +179,10 @@ function capitalizeFirst(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+function updateAudioVolume(value) {
+    const newVolume = value / 100.0;
+
+}
 // -----------------------------------------------------------------------------
 // Controls
 // -----------------------------------------------------------------------------
@@ -186,9 +192,9 @@ const volumeSlider = document.getElementById("volumeSlider");
 const nudgePlus = document.getElementById("adjustPlus");
 const nudgeMinus = document.getElementById("adjustMinus");
 const nudgeReset = document.getElementById("adjustReset");
+const muteButton = document.getElementById("muteButton");
 
 function OnJumpButtonClicked() {
-    console.log("Jump button pressed");
     isJumped = !isJumped;
 
     if (isJumped) {
@@ -200,6 +206,7 @@ function OnJumpButtonClicked() {
         respawnBoxElement.classList.remove("disabled");
         jumpedBoxElement.classList.add("disabled");
     }
+    updateDisplay();
 }
 
 function OnAltTimerCheckClicked() {
@@ -208,21 +215,37 @@ function OnAltTimerCheckClicked() {
     } else {
         mode = MODE1_STAGES;
     }
+
+    //console.log("Mode changed: " + JSON.stringify(mode));
 }
 
 function OnVolumeSliderChanged() {
-    const newVolume = volumeSlider.value / 100.0;
-    beepAudio.volume = newVolume;
-    respawnAudio.volume = newVolume;
+    volume = volumeSlider.value / 100.0;
+    beepAudio.volume = volume;
+    respawnAudio.volume = volume;
 
-    if (newVolume <= 1e-3) {
+    //console.log(beepAudio.volume);
+    //console.log(respawnAudio.volume);
+
+    if (volume <= 1e-3) {
         speakerIconElement.classList = SPEAKER_MUTE;
-    } else if (newVolume <= 0.5) {
+    } else if (volume <= 0.5) {
         speakerIconElement.classList = SPEAKER_VOL_LOW;
     } else {
         speakerIconElement.classList = SPEAKER_VOL_HIGH;
     }
 
+}
+
+function OnMuteButtonClicked() {
+    if (volume <= 1e-3) {
+        volume = .25
+    } else {
+        volume = 0;
+    }
+    volumeSlider.value = volume * 100;
+
+    volumeSlider.dispatchEvent(new Event('input'));
 }
 
 function OnNudgeMinusClicked() {
@@ -247,6 +270,7 @@ function SetUpEventListeners() {
     nudgeMinus.addEventListener('click', OnNudgeMinusClicked);
     nudgePlus.addEventListener('click', OnNudgePlusClicked);
     nudgeReset.addEventListener('click', OnNudgeResetClicked);
+    muteButton.addEventListener('click', OnMuteButtonClicked);
 }
 // -----------------------------------------------------------------------------
 // MVC
@@ -269,19 +293,29 @@ const nudgeElement = document.getElementById("nudge")
 const beepAudio = document.getElementById("beep");
 const respawnAudio = document.getElementById("respawn");
 const speakerIconElement = document.getElementById("speakerIcon");
+const arrowLeft = document.getElementById("arrowLeft");
+const arrowRight = document.getElementById("arrowRight");
 
 const SPEAKER_MUTE = "bi bi-volume-mute";
 const SPEAKER_VOL_HIGH = "bi bi-volume-up";
 const SPEAKER_VOL_LOW = "bi bi-volume-down";
+const ARROW_LEFT = "bi bi-arrow-left arrow"
+const ARROW_RIGHT = "bi bi-arrow-right arrow"
 
-function updateModel() {
-    const timeInSeconds = getCurrentTimeInSeconds();
-    stage = getCurrentStage(timeInSeconds);
-    timeRem = getTimeRemainingInStage(timeInSeconds);
+function updatePhase(timeRemaining) {
+    const newPhase = getCurrentPhase(timeRemaining);
 
-    phase = getCurrentPhase(timeRem);
-    phaseTime = getPhaseTime(timeRem);
+    if (isJumped && newPhase != phase) {
+        jumpedButton.click();
+    }
+
+    phase = newPhase;
+
+    phaseTime = getPhaseTime(timeRemaining);
     timeToPhase = timeRem - phaseTime;
+}
+
+function updateRespawn(timeRemaining) {
     respawnTime = getNextRespawnTime(timeRem);
     timeToRespawn = respawnTime > 0 ? timeRem - respawnTime : -1;
     jumpedRespawnTime = getNextJumpedRespawnTime(timeRem, phase);
@@ -290,16 +324,38 @@ function updateModel() {
     timeBetweenRespawn = getTimeBetweenRespawns(phase);
 }
 
+function updateModel() {
+    const timeInSeconds = getCurrentTimeInSeconds();
+    stage = getCurrentStage(timeInSeconds);
+    timeRem = getTimeRemainingInStage(timeInSeconds, stage);
+
+    updatePhase(timeRem);
+    updateRespawn(timeRem);
+}
+
+function updateArrows() {
+    if (isJumped) {
+        arrowLeft.classList = "";
+        arrowRight.classList = ARROW_RIGHT;
+    } else {
+        arrowLeft.classList = ARROW_LEFT;
+        arrowRight.classList = "";
+    }
+}
 function updateDisplay() {
     stageElement.textContent = `${capitalizeFirst(stage)}`;
     timeRemainingElement.textContent = `${formatTime(timeRem)}`;
 
-    console.log(timeToRespawn);
-
     if (stage == STAGES.WAR) {
         phaseElement.textContent = `${phase}`;
-        nextPhaseTimeElement.textContent = `${formatTime(phaseTime)}`;
-        timeToPhaseElement.textContent = `${formatTime(timeToPhase)}`;
+
+        if (timeToPhase > 0) {
+            nextPhaseTimeElement.textContent = `${formatTime(phaseTime)}`;
+            timeToPhaseElement.textContent = `${formatTime(timeToPhase)}`;
+        } else {
+            nextPhaseTimeElement.textContent = `${formatTime(0)}`;
+            timeToPhaseElement.textContent = `${formatTime(0)}`;
+        }
         nudgeElement.textContent = `${formatAdjustmentTime(userAdjustment)}`;
         if (respawnTime > 0) {
             nextRespawnTimeElement.textContent = `${formatTime(respawnTime)}`;
@@ -308,9 +364,9 @@ function updateDisplay() {
             timeToJumpRespawnElement.textContent = `${formatTime(timetoJumpedRespawn)}`;
         } else {
             nextRespawnTimeElement.textContent = NO_RESPAWNS_REMAINING;
-            timeToRespawnElement.textContent = " "
+            timeToRespawnElement.textContent = "0:00"
             nextJumpedRespawnTimeElement.textContent = NO_RESPAWNS_REMAINING;
-            timeToJumpRespawnElement.textContent = " ";
+            timeToJumpRespawnElement.textContent = "0:00";
         }
         countRespawnsElement.textContent = `${respawnsRemaining}`;
 
@@ -331,8 +387,12 @@ function updateDisplay() {
                 respawnAudio.play();
             }
         }
-
-        timeBetweenRespawnElement.textContent = `${timeBetweenRespawn}s`;
+        updateArrows();
+        if (timeBetweenRespawn > 0) {
+            timeBetweenRespawnElement.textContent = `${timeBetweenRespawn}s respawns`;
+        } else {
+            timeBetweenRespawnElement.textContent = "";
+        }
     } else {
         phaseElement.textContent = " "
         nextPhaseTimeElement.textContent = " ";
@@ -344,6 +404,8 @@ function updateDisplay() {
         timeToJumpRespawnElement.textContent = " "
         timeBetweenRespawnElement.textContent = " ";
         nudgeElement.textContent = "";
+        arrowLeft.classList = "";
+        arrowRight.classList = "";
     }
 
 }
@@ -353,8 +415,8 @@ function update() {
     updateDisplay();
 }
 
-beepAudio.volume = 0;
-respawnAudio.volume = 0;
+beepAudio.volume = volume
+respawnAudio.volume = volume;
 speakerIconElement.classList = SPEAKER_MUTE;
 
 SetUpEventListeners();
