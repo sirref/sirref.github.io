@@ -13,6 +13,21 @@
             color: #fff;
         }
 
+        .modal-content {
+            background-color: #222;
+            color: #fff;
+        }
+
+        .modal-header {
+            background-color: #333;
+            color: #fff;
+        }
+
+        .modal-footer {
+            background-color: #333;
+            color: #fff;
+        }
+
         .time-box {
             border: 3px solid #00f;
             padding: 20px;
@@ -201,6 +216,34 @@
         <small>Special thanks to Nellie Bean, Arla</small>
     </div>
     <div class="fixed-top text-start"> Game Timer Alpha </div>
+
+    <div class="fixed-top text-end">
+        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            <i class="bi bi-gear-wide-connected"></i>
+        </button>
+    </div>
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Settings</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    This is the content of the modal. You can add any information here.
+                </div>
+                <!-- Modal Footer with buttons -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <audio id="beep" src="./static/sounds/player_timer_beep.wav" preload="auto"></audio>
     <audio id="respawn" src="./static/sounds/player_respawn.wav" preload="auto"></audio>
     <script src="game-timer.js"></script>

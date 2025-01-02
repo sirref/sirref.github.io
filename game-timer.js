@@ -67,7 +67,7 @@ let timetoJumpedRespawn = 0;
 let phaseTime = 0;
 let timeToPhase = 0;
 let respawnsRemaining = 0;
-let userAdjustment = 0;
+let userAdjustment = parseInt(localStorage.getItem("userAdjustment")) || 0;
 let isJumped = false;
 let timeBetweenRespawn = 0;
 let volume = 0;
@@ -275,6 +275,15 @@ function OnNudgeResetClicked() {
     update();
 }
 
+function OnWindowBeforeUnload() {
+    localStorage.setItem("userAdjustment", userAdjustment);
+}
+
+function OnWindowLoad() {
+    console.log("load00");
+    userAdjustment = parseInt(localStorage.getItem("userAdjustment")) || 0;
+}
+
 function SetUpEventListeners() {
     jumpedButton.addEventListener('click', OnJumpButtonClicked);
     altTimersCheck.addEventListener('click', OnAltTimerCheckClicked);
@@ -283,6 +292,8 @@ function SetUpEventListeners() {
     nudgePlus.addEventListener('click', OnNudgePlusClicked);
     nudgeReset.addEventListener('click', OnNudgeResetClicked);
     muteButton.addEventListener('click', OnMuteButtonClicked);
+    window.addEventListener('beforeunload', OnWindowBeforeUnload);
+    window.addEventListener('DOMContentLoaded', OnWindowLoad);
 }
 // -----------------------------------------------------------------------------
 // MVC
