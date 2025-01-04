@@ -36,6 +36,14 @@
             margin-bottom: 20px;
         }
 
+        .respawn-box {
+            border: 3px solid #00f;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
         .box-label {
             font-style: italic;
             color: #ccc;
@@ -47,6 +55,11 @@
 
         .time-box span {
             font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .respawn-box span {
+            font-size: 3rem;
             font-weight: bold;
         }
 
@@ -115,7 +128,7 @@
         <!-- Second Row -->
         <div class="row min-vh-25 d-flex justify-content-center align-items-stretch">
             <div class="col-3 text-center">
-                <div class="time-box h-100" id="respawnBox">
+                <div class="respawn-box h-100" id="respawnBox">
                     <div class="box-label">Time to Respawn</div>
                     <span id="timeToRespawn"></span>
                 </div>
@@ -132,7 +145,7 @@
                 <i class="bi bi-arrow-right arrow" id="arrowRight"></i>
             </div>
             <div class="col-3 text-center">
-                <div class="time-box h-100" id="jumpedBox">
+                <div class="respawn-box h-100" id="jumpedBox">
                     <div class="box-label">Jumped Time to Respawn</div>
                     <span id="timeToRespawnJumped"></span>
                 </div>
@@ -142,16 +155,16 @@
 
         <!-- Third Row -->
         <div class="row pb-3 pt-3 d-flex justify-content-center align-items-stretch">
-            <div class="col-4 text-center">
+            <div class="col-3 text-center">
                 <div class="h-100 d-flex flex-column justify-content-center align-items-center">
                     <div class="sublabel">Respawn time:</div>
                     <div class="sublabel ms-3" id="nextRespawnTime">x</div>
                 </div>
             </div>
-            <div class="col-2 d-flex align-items-center justify-content-center">
+            <div class="col-4 d-flex align-items-center justify-content-center">
                 <!-- Empty column for spacing -->
             </div>
-            <div class="col-4 text-center">
+            <div class="col-3 text-center">
                 <div class="text-center h-100 d-flex flex-column justify-content-center align-items-center">
                     <div class="sublabel">Jumped respawn time:</div>
                     <div class="sublabel ms-3" id="nextJumpedRespawn">x</div>

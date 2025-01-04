@@ -17,13 +17,20 @@ const PHASES = Object.freeze({
     NONE: 0,
 });
 
+// const RESPAWN_TIMES0 = [
+//     1780, 1760, 1740, 1720, 1700, 1680, 1660, 1640, 1620, 1600,
+//     1580, 1560, 1540, 1520, 1500, 1492, 1464, 1436, 1408, 1380,
+//     1352, 1324, 1296, 1268, 1240, 1212, 1184, 1148, 1112, 1076,
+//     1040, 1004, 968, 932, 896, 860, 816, 772, 728, 684,
+//     640, 596, 550, 498, 446, 394, 342, 290, 230, 170,
+//     110, 50
+// ];
+
 const RESPAWN_TIMES = [
-    1780, 1760, 1740, 1720, 1700, 1680, 1660, 1640, 1620, 1600,
-    1580, 1560, 1540, 1520, 1500, 1492, 1464, 1436, 1408, 1380,
-    1352, 1324, 1296, 1268, 1240, 1212, 1184, 1148, 1112, 1076,
-    1040, 1004, 968, 932, 896, 860, 816, 772, 728, 684,
-    640, 596, 550, 498, 446, 394, 342, 290, 230, 170,
-    110, 50
+    1780, 1760, 1740, 1720, 1700, 1680, 1660, 1640, 1620, 1600, 1580, 1560,
+    1540, 1520, 1500, 1490, 1462, 1434, 1406, 1378, 1350, 1322, 1294, 1266, 1238,
+    1210, 1182, 1146, 1110, 1074, 1038, 1002, 966, 930, 894, 858, 814, 770, 726,
+    682, 638, 594, 550, 498, 446, 394, 342, 290, 230, 170, 110, 50
 ];
 
 const TIME_BETWEEN_RESPAWNS = [20, 28, 36, 44, 52, 60];
@@ -71,12 +78,47 @@ let userAdjustment = parseInt(localStorage.getItem("userAdjustment")) || 0;
 let isJumped = false;
 let timeBetweenRespawn = 0;
 let volume = 0;
+let clock = null;
 // -----------------------------------------------------------------------------
 // Logic
 // -----------------------------------------------------------------------------
+class SimulatedClock {
+    constructor(startTime) {
+        this.startTime = startTime
+    }
+
+    now() {
+        return this.startTime++ + userAdjustment;
+    }
+}
+
+class RealClock {
+    constructor() { }
+    now() {
+        const now = new Date();
+        return now.getMinutes() * 60 + now.getSeconds() + userAdjustment;
+    }
+}
+
+class ManualClock {
+    constructor() {
+        this.time = 0;
+    }
+    now() {
+        return this.time + userAdjustment;
+    }
+    forward() {
+        this.time += 1;
+    }
+    back() {
+        this.time -= 1;
+    }
+}
+
 function getCurrentTimeInSeconds() {
-    const now = new Date();
-    return now.getMinutes() * 60 + now.getSeconds() + userAdjustment;
+    // const now = new Date();
+    // return now.getMinutes() * 60 + now.getSeconds() + userAdjustment;
+    return clock.now();
 }
 
 function getCurrentStage(secondsIntoHour) {
@@ -192,7 +234,7 @@ function isLastRespawnInPhase(timeRemaining, phase) {
 
     const timeToPhase = timeRemaining - phaseTime;
 
-    return timeToPhase <= timeBetween;
+    return timeToPhase <= JUMP_ADJUSTMENT;
 }
 
 // -----------------------------------------------------------------------------
@@ -284,6 +326,16 @@ function OnWindowLoad() {
     userAdjustment = parseInt(localStorage.getItem("userAdjustment")) || 0;
 }
 
+function OneTimeRemainingElementWheel(event) {
+    event.preventDefault(); // Prevent default scroll behavior if needed
+    if (event.deltaY < 0) {
+        userAdjustment += 1;
+    } else if (event.deltaY > 0) {
+        userAdjustment -= 1;
+    }
+    updateDisplay();
+}
+
 function SetUpEventListeners() {
     jumpedButton.addEventListener('click', OnJumpButtonClicked);
     altTimersCheck.addEventListener('click', OnAltTimerCheckClicked);
@@ -294,6 +346,7 @@ function SetUpEventListeners() {
     muteButton.addEventListener('click', OnMuteButtonClicked);
     window.addEventListener('beforeunload', OnWindowBeforeUnload);
     window.addEventListener('DOMContentLoaded', OnWindowLoad);
+    timeRemainingElement.addEventListener('wheel', OneTimeRemainingElementWheel);
 }
 // -----------------------------------------------------------------------------
 // MVC
@@ -477,6 +530,9 @@ function update() {
     updateModel();
     updateDisplay();
 }
+
+clock = new SimulatedClock(20 * 60);
+//clock = new ManualClock();
 
 beepAudio.volume = volume
 respawnAudio.volume = volume;
