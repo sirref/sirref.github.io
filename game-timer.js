@@ -79,6 +79,14 @@ let isJumped = false;
 let timeBetweenRespawn = 0;
 let volume = 0;
 let clock = null;
+
+// -----------------------------------------------------------------------------
+// UI Variables
+// -----------------------------------------------------------------------------
+
+let fontSizeNormalRespawn = parseFloat(localStorage.getItem("fontSizeNormalRespawn")) || 3;
+let fontSizeJumpedRespawn = parseFloat(localStorage.getItem("fontSizeJumpedRespawn")) || 3;
+
 // -----------------------------------------------------------------------------
 // Logic
 // -----------------------------------------------------------------------------
@@ -247,6 +255,8 @@ const nudgePlus = document.getElementById("adjustPlus");
 const nudgeMinus = document.getElementById("adjustMinus");
 const nudgeReset = document.getElementById("adjustReset");
 const muteButton = document.getElementById("muteButton");
+const saveButton = document.getElementById("saveButton");
+const openModalButton = document.getElementById("openModal");
 
 function OnJumpButtonClicked() {
     isJumped = !isJumped;
@@ -319,11 +329,12 @@ function OnNudgeResetClicked() {
 
 function OnWindowBeforeUnload() {
     localStorage.setItem("userAdjustment", userAdjustment);
+    localStorage.setItem("fontSizeNormalRespawn", fontSizeNormalRespawn);
+    localStorage.setItem("fontSizeJumpedRespawn", fontSizeJumpedRespawn);
 }
 
 function OnWindowLoad() {
-    console.log("load00");
-    userAdjustment = parseInt(localStorage.getItem("userAdjustment")) || 0;
+    updateFontSizes();
 }
 
 function OneTimeRemainingElementWheel(event) {
@@ -334,6 +345,21 @@ function OneTimeRemainingElementWheel(event) {
         userAdjustment -= 1;
     }
     updateDisplay();
+}
+
+function OnSaveButtonClicked() {
+    fontSizeNormalRespawn = parseFloat(document.getElementById("fontSizeNormalInput").value, 3);
+    fontSizeJumpedRespawn = parseFloat(document.getElementById("fontSizeJumpInput").value, 3);
+    updateFontSizes();
+    console.log("close");
+    const modalElement = document.getElementById('exampleModal');
+    modalElement.hide();
+}
+
+function OnOpenModalButtonClicked() {
+    console.log("click")
+    document.getElementById("fontSizeNormalInput").value = `${fontSizeNormalRespawn}`;
+    document.getElementById("fontSizeJumpInput").value = `${fontSizeJumpedRespawn}`;
 }
 
 function SetUpEventListeners() {
@@ -347,6 +373,8 @@ function SetUpEventListeners() {
     window.addEventListener('beforeunload', OnWindowBeforeUnload);
     window.addEventListener('DOMContentLoaded', OnWindowLoad);
     timeRemainingElement.addEventListener('wheel', OneTimeRemainingElementWheel);
+    saveButton.addEventListener('click', OnSaveButtonClicked);
+    openModalButton.addEventListener('click', OnOpenModalButtonClicked);
 }
 // -----------------------------------------------------------------------------
 // MVC
@@ -529,6 +557,11 @@ function showControl(control) {
 function update() {
     updateModel();
     updateDisplay();
+}
+
+function updateFontSizes() {
+    timeToRespawnElement.style.fontSize = `${fontSizeNormalRespawn}rem`;
+    timeToJumpRespawnElement.style.fontSize = `${fontSizeJumpedRespawn}rem`;
 }
 
 clock = new SimulatedClock(20 * 60);

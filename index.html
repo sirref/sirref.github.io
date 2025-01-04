@@ -59,7 +59,7 @@
         }
 
         .respawn-box span {
-            font-size: 3rem;
+            font-size: 48pt;
             font-weight: bold;
         }
 
@@ -230,11 +230,13 @@
     </div>
     <div class="fixed-top text-start"> Game Timer Alpha </div>
 
-    <div class="fixed-top text-end invisible">
-        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+    <div class="fixed-top text-end">
+        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#exampleModal" ,
+            id="openModal">
             <i class="bi bi-gear-wide-connected"></i>
         </button>
     </div>
+
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -243,10 +245,29 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <div class="row align-items-center pb-2">
+                        <div class="col-6">
+                            <label for="fontSizeInput" class="form-label mb-0">Normal Respawn Font Size:</label>
+                        </div>
+                        <div class="col-6">
+                            <input type="text" id="fontSizeNormalInput" class="form-control form-control-sm" value="16"
+                                min="8" max="72" step="1" style="width: 80px;">
+                        </div>
+                    </div>
+                    <div class="row align-items-center pb-2">
+                        <div class="col-6">
+                            <label for="fontSizeInput" class="form-label mb-0">Jumped Respawn Font Size:</label>
+                        </div>
+                        <div class="col-6">
+                            <input type="text" id="fontSizeJumpInput" class="form-control form-control-sm" value="16"
+                                min="8" max="72" step="1" style="width: 80px;">
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="saveButton">Save
+                        changes</button>
                 </div>
             </div>
         </div>
