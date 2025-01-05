@@ -86,6 +86,7 @@ let clock = null;
 
 let fontSizeNormalRespawn = parseFloat(localStorage.getItem("fontSizeNormalRespawn")) || 3;
 let fontSizeJumpedRespawn = parseFloat(localStorage.getItem("fontSizeJumpedRespawn")) || 3;
+let fontSizeRespawnInterval = parseFloat(localStorage.getItem("fontSizeRespawnInterval")) || 1;
 
 // -----------------------------------------------------------------------------
 // Logic
@@ -331,6 +332,7 @@ function OnWindowBeforeUnload() {
     localStorage.setItem("userAdjustment", userAdjustment);
     localStorage.setItem("fontSizeNormalRespawn", fontSizeNormalRespawn);
     localStorage.setItem("fontSizeJumpedRespawn", fontSizeJumpedRespawn);
+    localStorage.setItem("fontSizeRespawnInterval", fontSizeRespawnInterval);
 }
 
 function OnWindowLoad() {
@@ -350,10 +352,10 @@ function OneTimeRemainingElementWheel(event) {
 function OnSaveButtonClicked() {
     fontSizeNormalRespawn = parseFloat(document.getElementById("fontSizeNormalInput").value, 3);
     fontSizeJumpedRespawn = parseFloat(document.getElementById("fontSizeJumpInput").value, 3);
-    updateFontSizes();
-    console.log("close");
+    fontSizeRespawnInterval = parseFloat(document.getElementById("fontSizeRespawnIntervalInput").value, 1);
     const modalElement = document.getElementById('exampleModal');
     modalElement.hide();
+    updateFontSizes();
 }
 
 function OnOpenModalButtonClicked() {
@@ -562,10 +564,12 @@ function update() {
 function updateFontSizes() {
     timeToRespawnElement.style.fontSize = `${fontSizeNormalRespawn}rem`;
     timeToJumpRespawnElement.style.fontSize = `${fontSizeJumpedRespawn}rem`;
+    timeBetweenRespawnElement.style.font = `${fontSizeRespawnInterval}rem`;
 }
 
-clock = new SimulatedClock(20 * 60);
+//clock = new SimulatedClock(20 * 60);
 //clock = new ManualClock();
+clock = new RealClock();
 
 beepAudio.volume = volume
 respawnAudio.volume = volume;
