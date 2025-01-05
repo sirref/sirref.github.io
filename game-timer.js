@@ -353,15 +353,15 @@ function OnSaveButtonClicked() {
     fontSizeNormalRespawn = parseFloat(document.getElementById("fontSizeNormalInput").value, 3);
     fontSizeJumpedRespawn = parseFloat(document.getElementById("fontSizeJumpInput").value, 3);
     fontSizeRespawnInterval = parseFloat(document.getElementById("fontSizeRespawnIntervalInput").value, 1);
-    const modalElement = document.getElementById('exampleModal');
-    modalElement.hide();
+    // const modalElement = document.getElementById('exampleModal');
+    // modalElement.hide();
     updateFontSizes();
 }
 
 function OnOpenModalButtonClicked() {
-    console.log("click")
     document.getElementById("fontSizeNormalInput").value = `${fontSizeNormalRespawn}`;
     document.getElementById("fontSizeJumpInput").value = `${fontSizeJumpedRespawn}`;
+    document.getElementById("fontSizeRespawnIntervalInput").value = `${fontSizeRespawnInterval}`;
 }
 
 function SetUpEventListeners() {
@@ -496,7 +496,7 @@ function updateDisplay() {
         }
         updateArrows();
         if (timeBetweenRespawn > 0) {
-            timeBetweenRespawnElement.textContent = `${timeBetweenRespawn}s respawns`;
+            timeBetweenRespawnElement.textContent = `${timeBetweenRespawn}s`;
         } else {
             timeBetweenRespawnElement.textContent = "";
         }
@@ -564,7 +564,7 @@ function update() {
 function updateFontSizes() {
     timeToRespawnElement.style.fontSize = `${fontSizeNormalRespawn}rem`;
     timeToJumpRespawnElement.style.fontSize = `${fontSizeJumpedRespawn}rem`;
-    timeBetweenRespawnElement.style.font = `${fontSizeRespawnInterval}rem`;
+    timeBetweenRespawnElement.style.fontSize = `${fontSizeRespawnInterval}rem`;
 }
 
 //clock = new SimulatedClock(20 * 60);
