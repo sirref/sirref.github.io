@@ -4,17 +4,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Centered Link</title>
+    <title>Image Crop Tool</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body {
-            display: flex;
-            background-color: #222;
+        .drag-drop-zone {
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .preview {
+            position: relative;
+            display: inline-block;
+        }
+
+        .cropping-window {
+            position: absolute;
+            border: 2px dashed red;
+            pointer-events: none;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
         }
     </style>
 </head>
 
-<body>
-    <h1>Nothing is here</h1>
+<body class="bg-dark text-light">
+    <div class="container py-4">
+        <h1 class="text-center mb-4">Image Crop Tool</h1>
+
+        <div class="row">
+            <!-- Drag and Drop Zone -->
+            <div class="col-md-6">
+                <div class="drag-drop-zone bg-light text-dark" id="drag-drop-zone">
+                    Drag and drop an image here or click to upload
+                </div>
+                <div class="preview mt-3" id="image-preview">
+                    <img id="preview-image" alt="" />
+                    <div class="cropping-window" id="cropping-window"></div>
+                </div>
+            </div>
+
+            <!-- Cropping Controls -->
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label for="crop-x">Top Left X:</label>
+                    <input type="number" class="form-control" id="crop-x" placeholder="X coordinate" value="0">
+                </div>
+                <div class="form-group mb-3">
+                    <label for="crop-y">Top Left Y:</label>
+                    <input type="number" class="form-control" id="crop-y" placeholder="Y coordinate" value="0">
+                </div>
+                <div class="form-group mb-3">
+                    <label for="crop-x2">Bottom Right X:</label>
+                    <input type="number" class="form-control" id="crop-x2" placeholder="X2 coordinate" value="100">
+                </div>
+                <div class="form-group mb-3">
+                    <label for="crop-y2">Bottom Right Y:</label>
+                    <input type="number" class="form-control" id="crop-y2" placeholder="Y2 coordinate" value="100">
+                </div>
+                <div class="form-group mb-3">
+                    <label for="result-dimensions">Resulting Dimensions:</label>
+                    <input type="text" class="form-control" id="result-dimensions" placeholder="Width x Height"
+                        readonly>
+                </div>
+                <button class="btn btn-primary" id="crop-button">Crop and Download</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const dragDropZone = document.getElementById('drag-drop-zone');
+        const previewImage = document.getElementById('preview-image');
+        const croppingWindow = document.getElementById('cropping-window');
+
+        const cropX = document.getElementById('crop-x');
+        const cropY = document.getElementById('crop-y');
+        const cropX2 = document.getElementById('crop-x2');
+        const cropY2 = document.getElementById('crop-y2');
+        const resultDimensions = document.getElementById('result-dimensions');
+        const cropButton = document.getElementById('crop-button');
+
+        let image = new Image();
+
+        dragDropZone.addEventListener('click', () => {
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*';
+            fileInput.onchange = (event) => handleFile(event.target.files[0]);
+            fileInput.click();
+        });
+
+        dragDropZone.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            dragDropZone.style.borderColor = 'blue';
+        });
+
+        dragDropZone.addEventListener('dragleave', () => {
+            dragDropZone.style.borderColor = '#ccc';
+        });
+
+        dragDropZone.addEventListener('drop', (event) => {
+            event.preventDefault();
+            dragDropZone.style.borderColor = '#ccc';
+            const file = event.dataTransfer.files[0];
+            handleFile(file);
+        });
+
+        function handleFile(file) {
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    image.src = event.target.result;
+                    previewImage.src = image.src;
+                    previewImage.onload = updateCroppingWindow;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                alert('Please upload a valid image file.');
+            }
+        }
+
+        function updateCroppingWindow() {
+            const x = parseInt(cropX.value) || 0;
+            const y = parseInt(cropY.value) || 0;
+            const x2 = parseInt(cropX2.value) || 100;
+            const y2 = parseInt(cropY2.value) || 100;
+
+            const width = x2 - x;
+            const height = y2 - y;
+
+            resultDimensions.value = `${width} x ${height}`;
+
+            const rect = previewImage.getBoundingClientRect();
+
+            croppingWindow.style.left = `${x / previewImage.naturalWidth * rect.width}px`;
+            croppingWindow.style.top = `${y / previewImage.naturalHeight * rect.height}px`;
+            croppingWindow.style.width = `${width / previewImage.naturalWidth * rect.width}px`;
+            croppingWindow.style.height = `${height / previewImage.naturalHeight * rect.height}px`;
+        }
+
+        function cropAndDownload() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            const x = parseInt(cropX.value) || 0;
+            const y = parseInt(cropY.value) || 0;
+            const x2 = parseInt(cropX2.value) || 100;
+            const y2 = parseInt(cropY2.value) || 100;
+
+            const width = x2 - x;
+            const height = y2 - y;
+
+            canvas.width = width;
+            canvas.height = height;
+
+            ctx.drawImage(
+                image,
+                x, y, width, height, // Source crop area
+                0, 0, width, height  // Destination on canvas
+            );
+
+            const croppedImage = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.href = croppedImage;
+            link.download = 'cropped-image.png';
+            link.click();
+        }
+
+        cropX.addEventListener('input', updateCroppingWindow);
+        cropY.addEventListener('input', updateCroppingWindow);
+        cropX2.addEventListener('input', updateCroppingWindow);
+        cropY2.addEventListener('input', updateCroppingWindow);
+        cropButton.addEventListener('click', cropAndDownload);
+    </script>
 </body>
 
 </html>

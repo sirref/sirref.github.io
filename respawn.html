@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Timer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #222;
+            color: #fff;
+        }
+
+        .modal-content {
+            background-color: #222;
+            color: #fff;
+        }
+
+        .modal-header {
+            background-color: #333;
+            color: #fff;
+        }
+
+        .modal-footer {
+            background-color: #333;
+            color: #fff;
+        }
+
+        .time-box {
+            border: 3px solid #00f;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .respawn-box {
+            border: 3px solid #00f;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .box-label {
+            font-style: italic;
+            color: #ccc;
+        }
+
+        .sublabel {
+            color: #888;
+        }
+
+        .time-box span {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .respawn-box span {
+            font-size: 48pt;
+            font-weight: bold;
+        }
+
+        .disabled {
+            color: #666;
+        }
+
+        .invisible {
+            visibility: hidden;
+        }
+
+        .btn-circle.btn-lg {
+            width: 70px;
+            height: 70px;
+        }
+
+        .btn-circle.btn-sm {
+            width: 30px;
+            height: 30px;
+        }
+
+        video {
+            width: 640px;
+            /* Fixed width */
+            height: 360px;
+            /* Fixed height */
+            margin: 20px auto;
+            display: block;
+            border: 2px solid #ffffff;
+            border-radius: 8px;
+            object-fit: contain;
+            /* Ensures the content fits nicely */
+            background-color: #000;
+            /* Black background in case no video is playing */
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="fixed-top text-end invisible">Kiki is best girl</div>
+
+    <div class="container">
+        <!-- First Row -->
+        <div class="row d-flex justify-content-center align-items-center">
+            <div class="col-4 text-center">
+                <div class="time-box h-100 d-flex flex-column justify-content-center align-items-center">
+                    <div class="d-flex justify-content-center align-items-center">
+                        <div class="box-label" id="stage"></div>
+                        <div class="box-label ms-2">Time</div>
+                    </div>
+                    <span id="timeRemaining" class="mt-2">Time Remaining</span>
+                    <div class="sublabel" id="nudge"></div>
+
+                    <div class="col-12 text-center d-flex justify-content-center pt-1">
+
+                        <button id="adjustMinus" class="btn btn-primary btn-sm flex-grow-1 mx-1">
+                            <i class="bi bi-chevron-double-left"></i>
+                        </button>
+
+                        <button id="adjustReset" class="btn btn-primary btn-sm flex-grow-1 mx-1"><i
+                                class="bi bi-arrow-counterclockwise"></i></button>
+
+                        <button id="adjustPlus" class="btn btn-primary btn-sm flex-grow-1 mx-1">
+                            <i class="bi bi-chevron-double-right"></i>
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row min-vh-25 d-flex justify-content-center align-items-center">
+            <div class="col-3 text-center">
+                <div class="respawn-box h-100" id="respawnBox">
+                    <div class="box-label">Time to Respawn</div>
+                    <span id="timeToRespawn"></span>
+                </div>
+            </div>
+
+            <div class="col-1 d-flex justify-content-center align-items-center">
+                <i class="bi bi-arrow-left arrow" id="arrowLeft"></i>
+            </div>
+            <div class="col-2 d-flex flex-column align-items-center">
+                <div class="row w-100 align-items-center mb-1">
+                    <div class="col d-flex justify-content-center">
+                        <button id="jumpButton" class="btn btn-primary w-100">Switch to Jumped</button>
+                    </div>
+                </div>
+                <div class="row w-100 align-items-center mt-1">
+                    <div class="col d-flex justify-content-center">
+                        <button id="captureButtonA" class="btn btn-primary w-100 invisible">A</button>
+                    </div>
+                    <div class="col d-flex justify-content-center">
+                        <button id="captureButtonB" class="btn btn-primary w-100 invisible">B</button>
+                    </div>
+                    <div class="col d-flex justify-content-center">
+                        <button id="captureButtonC" class="btn btn-primary w-100 invisible">C</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-1 d-flex justify-content-center align-items-center">
+                <i class="bi bi-arrow-right arrow" id="arrowRight"></i>
+            </div>
+            <div class="col-3 text-center">
+                <div class="respawn-box h-100" id="jumpedBox">
+                    <div class="box-label">Jumped Time to Respawn</div>
+                    <span id="timeToRespawnJumped"></span>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row pb-3 pt-3 d-flex justify-content-center align-items-stretch">
+            <div class="col-3 text-center">
+                <div class="h-100 d-flex flex-column justify-content-center align-items-center">
+                    <div class="sublabel">Respawn time:</div>
+                    <div class="sublabel ms-3" id="nextRespawnTime">x</div>
+                </div>
+            </div>
+            <div class="col-4 d-flex align-items-center justify-content-center">
+            </div>
+            <div class="col-3 text-center">
+                <div class="text-center h-100 d-flex flex-column justify-content-center align-items-center">
+                    <div class="sublabel">Jumped respawn time:</div>
+                    <div class="sublabel ms-3" id="nextJumpedRespawn">x</div>
+                </div>
+            </div>
+        </div>
+        <div class="row d-flex justify-content-center align-items-stretch">
+            <div class="col-4 text-center">
+                <div class="time-box d-flex flex-column h-100">
+                    <div class="box-label">Respawns left in phase</div>
+                    <span id="countRespawns"></span>
+                </div>
+            </div>
+            <div class="col-2 text-center">
+                <div class="time-box d-flex flex-column justify-content-center align-items-center h-100">
+                    <div class="d-flex justify-content-center align-items-center">
+                        <div class="box-label" id="phase"></div>
+                    </div>
+                    <div class="d-flex justify-content-center align-items-center">
+                        <div class="box-label" id="timeBetweenRespawn"></div>
+                    </div>
+                    <div class="box-label">respawns</div>
+                </div>
+            </div>
+            <div class="col-4 text-center">
+                <div class="time-box d-flex flex-column h-100">
+                    <div class="box-label">Time to Next Phase</div>
+                    <span id="timeToPhase"></span>
+                    <div class="sublabel" id="nextPhaseTime"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row d-flex justify-content-end align-items-stretch pt-3">
+            <div class="col-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="checkAltTimer">
+                    <label class="form-check-label" for="flexCheckDefault">
+                        Switch to XX:30 war timer
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="row d-flex justify-content-end align-items-center pt-3">
+            <div class="col-3 d-flex align-items-center">
+                <button id="muteButton" class="btn btn-secondary me-1" aria-label="Mute/Unmute">
+                    <i id="speakerIcon" class="bi bi-volume-up"></i>
+                </button>
+                <div>
+                    <input type="range" class="form-range" id="volumeSlider" min="0" max="100" step="5" value="0">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <video id="screenPreview" autoplay muted></video>
+                <canvas id="captureCanvas" width="640" height="480"></canvas>
+            </div>
+        </div>
+
+        <div class="fixed-bottom text-start">
+            <small>alpha expect bugs</small> <small><i class="bi bi-discord"></i> computer.0xff with bugs</small>
+        </div>
+        <div class="fixed-bottom text-end">
+            <small>Special thanks to Nellie Bean, Arla</small>
+        </div>
+        <div class="fixed-top text-start"> Game Timer Alpha </div>
+
+        <div class="fixed-top d-flex justify-content-end align-items-start p-2">
+            <button type="button" class="btn btn-secondary me-2" id="record">
+                <i class="bi bi-record-circle"></i>
+            </button>
+            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#exampleModal"
+                id="openModal">
+                <i class="bi bi-gear-wide-connected"></i>
+            </button>
+        </div>
+
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Settings</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Checkbox to toggle Simple UI -->
+                        <div class="row align-items-center pb-3">
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="simpleUICheckbox">
+                                    <label class="form-check-label" for="simpleUICheckbox">
+                                        Enable Simple UI
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Font size settings -->
+                        <div class="row align-items-center pb-2">
+                            <div class="col-6">
+                                <label for="fontSizeNormalInput" class="form-label mb-0">Normal Respawn Font
+                                    Size:</label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" id="fontSizeNormalInput" class="form-control form-control-sm"
+                                    value="16" min="8" max="72" step="1" style="width: 80px;">
+                            </div>
+                        </div>
+                        <div class="row align-items-center pb-2">
+                            <div class="col-6">
+                                <label for="fontSizeJumpInput" class="form-label mb-0">Jumped Respawn Font Size:</label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" id="fontSizeJumpInput" class="form-control form-control-sm"
+                                    value="16" min="8" max="72" step="1" style="width: 80px;">
+                            </div>
+                        </div>
+                        <div class="row align-items-center pb-2">
+                            <div class="col-6">
+                                <label for="fontSizeRespawnIntervalInput" class="form-label mb-0">Respawn Interval Font
+                                    Size:</label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" id="fontSizeRespawnIntervalInput"
+                                    class="form-control form-control-sm" value="16" min="8" max="72" step="1"
+                                    style="width: 80px;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="saveButton">Save
+                            changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <audio id="beep" src="./static/sounds/player_timer_beep.wav" preload="auto"></audio>
+        <audio id="respawn" src="./static/sounds/player_respawn.wav" preload="auto"></audio>
+        <script type="module" src="respawn.js"></script>
+        <script async src="https://docs.opencv.org/master/opencv.js" type="text/javascript"
+            onload="onOpenCvReady();"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+
+        </script>
+</body>
+
+</html>

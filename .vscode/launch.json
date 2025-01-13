@@ -5,10 +5,39 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Launch Local Server and Debug",
             "type": "msedge",
             "request": "launch",
-            "name": "Open index.html",
-            "file": "${workspaceFolder}/index.html"
+            "url": "http://localhost:8000/index.html",
+            "webRoot": "${workspaceFolder}",
+            "preLaunchTask": "Start Local Server",
+            "runtimeArgs": [
+                "--clear-data" // Clears cache, cookies, and site data
+            ]
+        },
+        {
+            "name": "Python HTTP Server",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/start-server.py",
+            "args": [
+                "-m",
+                "http.server",
+                "8000"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Python HTTP Server (http.server)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "http.server",
+            "args": [
+                "8000"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}"
         }
     ]
 }
