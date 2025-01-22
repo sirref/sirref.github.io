@@ -1,44 +1,155 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <title>Hello OpenCV.js</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HSV Masking Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #333;
+            color: #f0f0f0;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #image-preview {
+            max-width: 100%;
+            max-height: 400px;
+            margin: 20px auto;
+            display: block;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px;
+        }
+
+        .input {
+            margin: 10px 0;
+        }
+
+        canvas {
+            display: block;
+            margin: 20px auto;
+            border: 1px solid #666;
+            min-width: 80%;
+            min-height: 600px;
+        }
+    </style>
 </head>
 
 <body>
-    <h2>Hello OpenCV.js</h2>
-    <p id="status">OpenCV.js is loading...</p>
-    <div>
-        <div class="inputoutput">
-            <img id="imageSrc" alt="No Image" />
-            <div class="caption">imageSrc <input type="file" id="fileInput" name="file" /></div>
-        </div>
-        <div class="inputoutput">
-            <canvas id="canvasOutput"></canvas>
-            <div class="caption">canvasOutput</div>
-        </div>
+    <h1>HSV Masking Tool</h1>
+    <input type="file" id="image-upload" accept="image/*">
+    <canvas id="canvas" width="600" height="600"></canvas>
+
+    <div class="input-group">
+        <h2>HSV Range</h2>
+        <label>Hue Min: <input type="number" id="h-min" class="input" min="0" max="360" value="0"></label>
+        <label>Hue Max: <input type="number" id="h-max" class="input" min="0" max="360" value="360"></label>
+        <label>Saturation Min: <input type="number" id="s-min" class="input" min="0" max="100" value="0"></label>
+        <label>Saturation Max: <input type="number" id="s-max" class="input" min="0" max="100" value="100"></label>
+        <label>Value Min: <input type="number" id="v-min" class="input" min="0" max="100" value="0"></label>
+        <label>Value Max: <input type="number" id="v-max" class="input" min="0" max="100" value="100"></label>
     </div>
-    <script type="text/javascript">
-        let imgElement = document.getElementById('imageSrc');
-        let inputElement = document.getElementById('fileInput');
-        inputElement.addEventListener('change', (e) => {
-            imgElement.src = URL.createObjectURL(e.target.files[0]);
-        }, false);
-        imgElement.onload = function () {
-            let mat = cv.imread(imgElement);
-            cv.imshow('canvasOutput', mat);
-            mat.delete();
+
+    <script>
+        const imageUpload = document.getElementById('image-upload');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        const hsvInputs = {
+            hMin: document.getElementById('h-min'),
+            hMax: document.getElementById('h-max'),
+            sMin: document.getElementById('s-min'),
+            sMax: document.getElementById('s-max'),
+            vMin: document.getElementById('v-min'),
+            vMax: document.getElementById('v-max')
         };
-        var Module = {
-            // https://emscripten.org/docs/api_reference/module.html#Module.onRuntimeInitialized
-            onRuntimeInitialized() {
-                document.getElementById('status').innerHTML = 'OpenCV.js is ready.';
+
+        Object.values(hsvInputs).forEach(input => input.addEventListener('input', applyMask));
+
+        let image = new Image();
+
+        imageUpload.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    image.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
             }
+        });
+
+        image.onload = () => {
+            canvas.width = image.width;
+            canvas.height = image.height;
+            ctx.drawImage(image, 0, 0);
+            applyMask();
         };
+
+        function rgbToHsv(r, g, b) {
+            r /= 255;
+            g /= 255;
+            b /= 255;
+            const max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h, s, v = max;
+
+            const d = max - min;
+            s = max === 0 ? 0 : d / max;
+
+            if (max === min) {
+                h = 0; // achromatic
+            } else {
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+
+            return [h * 360, s * 100, v * 100];
+        }
+
+        function isInRange(h, s, v, range) {
+            return (
+                h >= range.hMin && h <= range.hMax &&
+                s >= range.sMin && s <= range.sMax &&
+                v >= range.vMin && v <= range.vMax
+            );
+        }
+
+        function applyMask() {
+            if (!image.src) return;
+            ctx.drawImage(image, 0, 0);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+
+            const range = {
+                hMin: +hsvInputs.hMin.value,
+                hMax: +hsvInputs.hMax.value,
+                sMin: +hsvInputs.sMin.value,
+                sMax: +hsvInputs.sMax.value,
+                vMin: +hsvInputs.vMin.value,
+                vMax: +hsvInputs.vMax.value
+            };
+
+            for (let i = 0; i < data.length; i += 4) {
+                const [h, s, v] = rgbToHsv(data[i], data[i + 1], data[i + 2]);
+                if (!isInRange(h, s, v, range)) {
+                    data[i] = data[i + 1] = data[i + 2] = 0; // Mask out pixel
+                }
+            }
+
+            ctx.putImageData(imageData, 0, 0);
+        }
     </script>
-    <script> async function onCvReady() { window.cv = await window.cv; } </script>
-    <script async src="./static/scripts/opencv.js" type="text/javascript" onload="onCvReady();"></script>
 </body>
 
 </html>

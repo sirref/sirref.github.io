@@ -2,6 +2,7 @@ import { RealClock } from './real-clock.js'
 import { GameTimer, STAGES, PHASES } from './game-clock.js'
 import { RespawnTimer } from './respawn-timer.js'
 import { Caller } from './caller.js';
+import { Watcher } from './watcher.js';
 // -----------------------------------------------------------------------------
 // Constants
 // -----------------------------------------------------------------------------
@@ -48,6 +49,90 @@ const JUMP_ADJUSTMENT = 8;
 
 const NO_RESPAWNS_REMAINING = "No respawns remaining"
 
+const COIS = {
+    "enemy": {
+        min: (340, 65, 50),
+        max: (360, 100, 100)
+    },
+    "friendly": {
+        min: (180, 50, 40),
+        max: (240, 100, 100)
+    }
+};
+const ROIS = [
+    {
+        name: "A",
+        crop: { x: 879, y: 63, w: 40, h: 40 },
+        mask: {
+            include: [
+                {
+                    type: "circle",
+                    center: { x: 899, y: 83 },
+                    radius: 20
+                }
+            ],
+            exclude: [
+                {
+                    type: "circle",
+                    center: { x: 899, y: 83 },
+                    radius: 15
+                }
+            ]
+        },
+        range: {
+            "enemy": {
+                min: (340, 65, 50),
+                max: (360, 100, 100)
+            },
+            "friendly": {
+                min: (180, 50, 40),
+                max: (240, 100, 100)
+            }
+        }
+    },
+    {
+        name: "B",
+        crop: { x: 939, y: 63, w: 40, h: 40 },
+        mask: {
+            include: [
+                {
+                    type: "circle",
+                    center: { x: 959, y: 83 },
+                    radius: 20
+                }
+            ],
+            exclude: [
+                {
+                    type: "circle",
+                    center: { x: 959, y: 83 },
+                    radius: 15
+                }
+            ]
+        }
+    },
+    {
+        name: "C",
+        crop: { x: 999, y: 63, w: 40, h: 40 },
+        mask: {
+            include: [
+                {
+                    type: "circle",
+                    center: { x: 1019, y: 83 },
+                    radius: 20
+                }
+            ],
+            exclude: [
+                {
+                    type: "circle",
+                    center: { x: 1019, y: 83 },
+                    radius: 20
+                }
+            ]
+        }
+    }
+];
+
+
 // -----------------------------------------------------------------------------
 // Variables
 // -----------------------------------------------------------------------------
@@ -74,6 +159,7 @@ const clock = new RealClock(0);
 const gameTimer = new GameTimer(clock, MODE1_STAGES, PHASE_TIMES);
 const respawmTimer = new RespawnTimer(gameTimer, RESPAWN_TIMES, RESPAWN_INTERVALS, JUMP_ADJUSTMENT);
 const caller = new Caller(respawmTimer, gameTimer);
+let watcher = null
 
 // -----------------------------------------------------------------------------
 // UI Variables
@@ -117,79 +203,6 @@ const muteButton = document.getElementById("muteButton");
 const saveButton = document.getElementById("saveButton");
 const openModalButton = document.getElementById("openModal");
 const simpleUICheckbox = document.getElementById("simpleUICheckbox");
-const recordButton = document.getElementById("record");
-const videoElement = document.getElementById('screenPreview');
-const canvas = document.getElementById('captureCanvas');
-const processedImage = document.getElementById('processedImage');
-let mediaStream = null;
-
-
-function processVideo() {
-    const ctx = canvas.getContext('2d');
-    // Set up OpenCV mats
-    const videoMat = new cv.Mat(videoElement.videoHeight, videoElement.videoWidth, cv.CV_8UC4);
-    const grayMat = new cv.Mat(videoElement.videoHeight, videoElement.videoWidth, cv.CV_8UC1);
-
-    // Resize the canvas to fit the video
-    canvas.width = 640; // Fixed width
-    canvas.height = Math.round(videoElement.videoHeight * (640 / videoElement.videoWidth));
-
-    const FPS = 30;
-
-    function processFrame() {
-        if (videoElement.paused || videoElement.ended) {
-            videoMat.delete();
-            grayMat.delete();
-            return;
-        }
-
-        // Draw video frame to canvas
-        ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-
-        // Convert the canvas to OpenCV Mat
-        const src = cv.imread(canvas);
-        cv.cvtColor(src, grayMat, cv.COLOR_RGBA2GRAY);
-
-        // Convert the grayscale Mat back to RGBA
-        cv.cvtColor(grayMat, src, cv.COLOR_GRAY2RGBA);
-
-        // Render the processed frame to the canvas
-        cv.imshow('captureCanvas', src);
-
-        src.delete();
-
-        setTimeout(processFrame, 1000 / FPS);
-    }
-
-    processFrame();
-}
-
-async function startScreenCapture() {
-    try {
-        mediaStream = await navigator.mediaDevices.getDisplayMedia({
-            video: true,
-            audio: false
-        });
-
-        // Set the media stream as the source for the video element
-        videoElement.srcObject = mediaStream;
-        videoElement.onplay = () => {
-            processVideo();
-        };
-    } catch (error) {
-        console.error('Error capturing screen:', error);
-    }
-}
-
-function stopScreenCapture() {
-    if (mediaStream) {
-        const tracks = mediaStream.getTracks();
-        tracks.forEach(track => track.stop()); // Stop all tracks
-    }
-    mediaStream = null;
-    videoElement.srcObject = null; // Clear the video source
-}
-
 
 function OnJumpButtonClicked() {
     caller.toggleJumped();
@@ -329,7 +342,6 @@ function SetUpEventListeners() {
     saveButton.addEventListener('click', OnSaveButtonClicked);
     openModalButton.addEventListener('click', OnOpenModalButtonClicked);
     simpleUICheckbox.addEventListener('click', OnSimpleUICheckboxClicked);
-    recordButton.addEventListener('click', OnRecordClicked);
 }
 // -----------------------------------------------------------------------------
 // MVC
@@ -502,8 +514,8 @@ function setControlVisibility(control, isVisible) {
 //clock = new ManualClock();
 
 
-//beepAudio.volume = volume
-//respawnAudio.volume = volume;
+beepAudio.volume = volume
+respawnAudio.volume = volume;
 speakerIconElement.classList = SPEAKER_MUTE;
 
 SetUpEventListeners();
