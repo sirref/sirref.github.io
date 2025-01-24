@@ -157,8 +157,8 @@ let volume = 0;
 // let clock = null;
 let simpleUI = Boolean(parseInt(localStorage.getItem("simpleUI")) || 0);
 
-//const clock = new RealClock(0);
-const clock = new SimulatedClock(20 * 60, 1);
+const clock = new RealClock(0);
+//const clock = new SimulatedClock(20 * 60, 1);
 const gameTimer = new GameTimer(clock, MODE1_STAGES, PHASE_TIMES);
 const respawmTimer = new RespawnTimer(gameTimer, RESPAWN_TIMES, RESPAWN_INTERVALS, JUMP_ADJUSTMENT);
 const caller = new Caller(respawmTimer, gameTimer);
