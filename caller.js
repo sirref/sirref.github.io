@@ -28,11 +28,14 @@ export class Caller {
     }
 
     capture(label) {
+        this.manual = false;
         this.points[label].captureTime = this.gameTimer.getTimeRemainingInStage();
         this.points[label].capturePhase = this.gameTimer.getPhase();
+        this.respawnTimer.setJumped(true);
     }
 
     upcature(label) {
+        this.manual = false;
         this.points[label].captureTime = 0;
         this.points[label].capturePhase = PHASES.NONE;
     }
@@ -59,7 +62,7 @@ export class Caller {
                     anyCaptures = true;
                 }
             });
-            return anyCaptures;
+            return !anyCaptures;
         }
     }
 
