@@ -6,6 +6,7 @@ export class RespawnTimer {
         this.respawnTimes = respawnTimes;
         this.intervals = intervals
         this.jumpTime = jumpAdjustment;
+        this.jumped = false;
     }
 
     getRespawnAtTime(timeRemaining) {
@@ -22,7 +23,11 @@ export class RespawnTimer {
     }
 
     getTimeToRespawn() {
-        return this.gameTimer.getTimeRemainingInStage() - this.getNextNormalRespawn();
+        if (this.jumped) {
+            return this.getTimeToJumpedRespawn();
+        } else {
+            return this.getTimeToNormalRespawn();
+        }
     }
 
     getNextJumpedRespawn() {
@@ -43,6 +48,10 @@ export class RespawnTimer {
 
         const nextRespawnTime = this.getRespawnAtTime(normalRespawnTime - 1);
         return nextRespawnTime + this.jumpTime;
+    }
+
+    getTimeToNormalRespawn() {
+        return this.gameTimer.getTimeRemainingInStage() - this.getNextNormalRespawn();
     }
 
     getTimeToJumpedRespawn() {
@@ -75,4 +84,15 @@ export class RespawnTimer {
         return this.intervals[phase - 1];
     }
 
+    isJumped() {
+        return this.jumped;
+    }
+
+    toggleJumped() {
+        this.setJumped(!this.jumped);
+    }
+
+    setJumped(value) {
+        this.jumped = value;
+    }
 }

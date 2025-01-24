@@ -3,6 +3,8 @@ import { GameTimer, STAGES, PHASES } from './game-clock.js'
 import { RespawnTimer } from './respawn-timer.js'
 import { Caller } from './caller.js';
 import { Watcher } from './watcher.js';
+import { SimulatedClock } from './simulated-clock.js';
+import { SoundNotifications } from './sound-notifications.js';
 // -----------------------------------------------------------------------------
 // Constants
 // -----------------------------------------------------------------------------
@@ -155,7 +157,8 @@ let volume = 0;
 // let clock = null;
 let simpleUI = Boolean(parseInt(localStorage.getItem("simpleUI")) || 0);
 
-const clock = new RealClock(0);
+//const clock = new RealClock(0);
+const clock = new SimulatedClock(20 * 60, 1);
 const gameTimer = new GameTimer(clock, MODE1_STAGES, PHASE_TIMES);
 const respawmTimer = new RespawnTimer(gameTimer, RESPAWN_TIMES, RESPAWN_INTERVALS, JUMP_ADJUSTMENT);
 const caller = new Caller(respawmTimer, gameTimer);
@@ -168,6 +171,15 @@ let watcher = null
 let fontSizeNormalRespawn = parseFloat(localStorage.getItem("fontSizeNormalRespawn")) || 3;
 let fontSizeJumpedRespawn = parseFloat(localStorage.getItem("fontSizeJumpedRespawn")) || 3;
 let fontSizeRespawnInterval = parseFloat(localStorage.getItem("fontSizeRespawnInterval")) || 1;
+let updateRate = parseInt(localStorage.getItem("updateRate")) || 1000;
+let soundToggles = [
+    (localStorage.getItem("sound0") == "true"),
+    (localStorage.getItem("sound1") == "true"),
+    (localStorage.getItem("sound2") == "true"),
+    (localStorage.getItem("sound3") == "true"),
+    (localStorage.getItem("sound10") == "true"),
+    (localStorage.getItem("sound20") == "true"),
+]
 
 function formatTime(seconds) {
     const minutesRemaining = Math.floor(seconds / 60);
@@ -203,19 +215,12 @@ const muteButton = document.getElementById("muteButton");
 const saveButton = document.getElementById("saveButton");
 const openModalButton = document.getElementById("openModal");
 const simpleUICheckbox = document.getElementById("simpleUICheckbox");
+const soundSlider = document.getElementById("soundVolume");
 
 function OnJumpButtonClicked() {
-    caller.toggleJumped();
+    caller.toggleJump();
 
-    if (caller.isJumped()) {
-        jumpedButton.textContent = "Switch to Normal";
-        respawnBoxElement.classList.add("disabled");
-        jumpedBoxElement.classList.remove("disabled");
-    } else {
-        jumpedButton.textContent = "Switch to Jumped";
-        respawnBoxElement.classList.remove("disabled");
-        jumpedBoxElement.classList.add("disabled");
-    }
+
     updateDisplay();
 }
 
@@ -229,13 +234,12 @@ function OnAltTimerCheckClicked() {
     //console.log("Mode changed: " + JSON.stringify(mode));
 }
 
-function OnVolumeSliderChanged() {
-    volume = volumeSlider.value / 100.0;
-    beepAudio.volume = volume;
-    respawnAudio.volume = volume;
-
-    //console.log(beepAudio.volume);
-    //console.log(respawnAudio.volume);
+function OnVolumeSliderChanged(target) {
+    const value = target.currentTarget.value;
+    volume = value / 100.0;
+    volumeSlider.value = value;
+    soundSlider.value = value;
+    updateSounds();
 
     if (volume <= 1e-3) {
         speakerIconElement.classList = SPEAKER_MUTE;
@@ -279,6 +283,14 @@ function OnWindowBeforeUnload() {
     localStorage.setItem("fontSizeJumpedRespawn", fontSizeJumpedRespawn);
     localStorage.setItem("fontSizeRespawnInterval", fontSizeRespawnInterval);
     localStorage.setItem("simpleUI", simpleUI);
+    localStorage.setItem("updatRate", updateRate);
+    localStorage.setItem("sound0", soundToggles[0]);
+    localStorage.setItem("sound1", soundToggles[1]);
+    localStorage.setItem("sound2", soundToggles[2]);
+    localStorage.setItem("sound3", soundToggles[3]);
+    localStorage.setItem("sound10", soundToggles[4]);
+    localStorage.setItem("sound20", soundToggles[5]);
+
 }
 
 function OnWindowLoad() {
@@ -296,24 +308,42 @@ function OneTimeRemainingElementWheel(event) {
 }
 
 function OnSaveButtonClicked() {
-    fontSizeNormalRespawn = parseFloat(document.getElementById("fontSizeNormalInput").value, 3);
-    fontSizeJumpedRespawn = parseFloat(document.getElementById("fontSizeJumpInput").value, 3);
-    fontSizeRespawnInterval = parseFloat(document.getElementById("fontSizeRespawnIntervalInput").value, 1);
+    fontSizeNormalRespawn = parseFloat(document.getElementById("fontSizeNormalInput").value);
+    fontSizeJumpedRespawn = parseFloat(document.getElementById("fontSizeJumpInput").value);
+    fontSizeRespawnInterval = parseFloat(document.getElementById("fontSizeRespawnIntervalInput").value);
+    updateRate = parseInt(document.getElementById("updateRateInput").value);
+    simpleUI = simpleUICheckbox.checked;
+
+    soundToggles[0] = document.getElementById("enableBeep0").checked;
+    soundToggles[1] = document.getElementById("enableBeep1").checked;
+    soundToggles[2] = document.getElementById("enableBeep2").checked;
+    soundToggles[3] = document.getElementById("enableBeep3").checked;
+    soundToggles[4] = document.getElementById("enableBeep10").checked;
+    soundToggles[5] = document.getElementById("enableBeep20").checked;
+
     // const modalElement = document.getElementById('exampleModal');
     // modalElement.hide();
     updateFontSizes();
+    updateSimpleUI();
+    updateSounds();
 }
 
 function OnOpenModalButtonClicked() {
     document.getElementById("fontSizeNormalInput").value = `${fontSizeNormalRespawn}`;
     document.getElementById("fontSizeJumpInput").value = `${fontSizeJumpedRespawn}`;
     document.getElementById("fontSizeRespawnIntervalInput").value = `${fontSizeRespawnInterval}`;
+    document.getElementById("updateRateInput").value = `${updateRate}`;
+    document.getElementById("enableBeep0").checked = soundToggles[0];
+    document.getElementById("enableBeep1").checked = soundToggles[1];
+    document.getElementById("enableBeep2").checked = soundToggles[2];
+    document.getElementById("enableBeep3").checked = soundToggles[3];
+    document.getElementById("enableBeep10").checked = soundToggles[4];
+    document.getElementById("enableBeep20").checked = soundToggles[5];
+    soundSlider.value = volume * 100;
 }
 
 function OnSimpleUICheckboxClicked() {
-    simpleUI = simpleUICheckbox.checked;
-    console.log(simpleUI);
-    updateDisplay();
+
 }
 
 function OnRecordClicked() {
@@ -326,6 +356,32 @@ function OnRecordClicked() {
 
 export async function onOpenCvReady() {
     window.cv = await window.cv;
+}
+
+function OnCaptureButtonClicked(target) {
+    const isCapped = target.classList.contains('btn-primary')
+
+    if (!isCapped) {
+        if (target.id == captureButtonA.id) {
+            caller.capture("A");
+        } else if (target.id == captureButtonB.id) {
+            caller.capture("B");
+        } else if (target.id == captureButtonC.id) {
+            caller.capture("C");
+        }
+        target.classList.remove('btn-secondary');
+        target.classList.add('btn-primary');
+    } else {
+        if (target.id == captureButtonA.id) {
+            caller.upcature("A");
+        } else if (target.id == captureButtonB.id) {
+            caller.upcature("B");
+        } else if (target.id == captureButtonC.id) {
+            caller.upcature("C");
+        }
+        target.classList.remove('btn-primary');
+        target.classList.add('btn-secondary');
+    }
 }
 
 function SetUpEventListeners() {
@@ -342,6 +398,11 @@ function SetUpEventListeners() {
     saveButton.addEventListener('click', OnSaveButtonClicked);
     openModalButton.addEventListener('click', OnOpenModalButtonClicked);
     simpleUICheckbox.addEventListener('click', OnSimpleUICheckboxClicked);
+    captureButtonA.addEventListener('click', event => { OnCaptureButtonClicked(event.target); });
+    captureButtonB.addEventListener('click', event => { OnCaptureButtonClicked(event.target); });
+    captureButtonC.addEventListener('click', event => { OnCaptureButtonClicked(event.target); });
+    soundSlider.addEventListener('input', OnVolumeSliderChanged);
+
 }
 // -----------------------------------------------------------------------------
 // MVC
@@ -359,10 +420,14 @@ const countRespawnsElement = document.getElementById("countRespawns");
 const respawnBoxElement = document.getElementById("respawnBox");
 const jumpedBoxElement = document.getElementById("jumpedBox");
 const timeBetweenRespawnElement = document.getElementById("timeBetweenRespawn");
-const nudgeElement = document.getElementById("nudge")
+const nudgeElement = document.getElementById("nudge");
+const simpleUIRow = document.getElementById("simpleUIRow");
 
 const beepAudio = document.getElementById("beep");
 const respawnAudio = document.getElementById("respawn");
+const tenSecondsAudio = document.getElementById("tenSeconds");
+const twentySecondsAudio = document.getElementById("twentySeconds");
+
 const speakerIconElement = document.getElementById("speakerIcon");
 const arrowLeft = document.getElementById("arrowLeft");
 const arrowRight = document.getElementById("arrowRight");
@@ -370,17 +435,17 @@ const arrowRight = document.getElementById("arrowRight");
 const SPEAKER_MUTE = "bi bi-volume-mute";
 const SPEAKER_VOL_HIGH = "bi bi-volume-up";
 const SPEAKER_VOL_LOW = "bi bi-volume-down";
-const ARROW_LEFT = "bi bi-arrow-left arrow"
-const ARROW_RIGHT = "bi bi-arrow-right arrow"
 
+const aduioElements = [beepAudio, respawnAudio, tenSecondsAudio, twentySecondsAudio];
 
 function updateArrows() {
-    if (caller.isJumped()) {
-        arrowLeft.classList = "";
-        arrowRight.classList = ARROW_RIGHT;
+    console.log("updatearrows");
+    if (respawmTimer.isJumped()) {
+        arrowLeft.classList = '';
+        arrowRight.classList = 'bi bi-arrow-right arrow'
     } else {
-        arrowLeft.classList = ARROW_LEFT;
-        arrowRight.classList = "";
+        arrowLeft.classList = 'bi bi-arrow-left arrow';
+        arrowRight.classList = '';
     }
 }
 function updateDisplay() {
@@ -399,8 +464,6 @@ function updateDisplay() {
         // Toggle visibility of controls
         toggleControlsVisibility(true);
 
-        // Handle Simple UI
-        toggleCaptureButtons(simpleUI);
     } else {
         toggleControlsVisibility(false);
     }
@@ -417,7 +480,7 @@ function updateRespawnInfo() {
     const nextNormalRespawn = respawmTimer.getNextNormalRespawn();
     if (nextNormalRespawn > 0) {
         nextRespawnTimeElement.textContent = formatTime(nextNormalRespawn);
-        timeToRespawnElement.textContent = formatTime(respawmTimer.getTimeToRespawn());
+        timeToRespawnElement.textContent = formatTime(respawmTimer.getTimeToNormalRespawn());
         nextJumpedRespawnTimeElement.textContent = formatTime(respawmTimer.getNextJumpedRespawn());
         timeToJumpRespawnElement.textContent = formatTime(respawmTimer.getTimeToJumpedRespawn());
     } else {
@@ -430,19 +493,16 @@ function updateRespawnInfo() {
 }
 
 function updateJumpedState() {
-    const isJumped = caller.isJumped();
+    const isJumped = respawmTimer.isJumped();
     respawnBoxElement.classList.toggle("disabled", isJumped);
     jumpedBoxElement.classList.toggle("disabled", !isJumped);
+    jumpedButton.textContent = isJumped ? "Switch to Normal" : "Switch to Jumped";
 
-    const respawnTime = isJumped
-        ? respawmTimer.getTimeToJumpedRespawn()
-        : respawmTimer.getTimeToRespawn();
-
-    if (respawnTime > 0 && respawnTime <= 3) {
-        beepAudio.play();
-    } else if (respawnTime === 0) {
-        respawnAudio.play();
-    }
+    // if (respawnTime > 0 && respawnTime <= 3) {
+    //     beepAudio.play();
+    // } else if (respawnTime === 0) {
+    //     respawnAudio.play();
+    // }
 }
 
 function updateRespawnInterval() {
@@ -460,11 +520,6 @@ function toggleControlsVisibility(isWar) {
     ];
 
     controls.forEach(control => setControlVisibility(control, isWar));
-}
-
-function toggleCaptureButtons(show) {
-    const buttons = [captureButtonA, captureButtonB, captureButtonC];
-    buttons.forEach(button => setControlVisibility(button, show));
 }
 
 
@@ -492,13 +547,33 @@ function showControl(control) {
 }
 
 function update() {
+    //console.log("update called");
     updateDisplay();
+    soundsManager.forEach(element => { element.update(); });
+    caller.update();
 }
 
 function updateFontSizes() {
     timeToRespawnElement.style.fontSize = `${fontSizeNormalRespawn}rem`;
     timeToJumpRespawnElement.style.fontSize = `${fontSizeJumpedRespawn}rem`;
     timeBetweenRespawnElement.style.fontSize = `${fontSizeRespawnInterval}rem`;
+}
+
+function updateSimpleUI() {
+    if (!simpleUIRow) return;
+    if (simpleUI) {
+        simpleUIRow.classList.remove('invisible');
+    } else {
+        simpleUIRow.classList.add('invisible');
+    }
+    caller.manual = !simpleUI;
+}
+
+function updateSounds() {
+    aduioElements.forEach(element => { element.volume = volume; });
+    for (let i = 0; i < soundsManager.length; i++) {
+        soundsManager[i].disabled = !soundToggles[i];
+    }
 }
 
 function setControlVisibility(control, isVisible) {
@@ -510,16 +585,22 @@ function setControlVisibility(control, isVisible) {
 }
 
 
-//clock = new SimulatedClock(20 * 60);
+//clock = new SimulatedClock(20 * 60, 1);
 //clock = new ManualClock();
-
-
-beepAudio.volume = volume
-respawnAudio.volume = volume;
+const soundsManager = [
+    new SoundNotifications(respawmTimer, 0, respawnAudio),
+    new SoundNotifications(respawmTimer, 1, beepAudio),
+    new SoundNotifications(respawmTimer, 2, beepAudio),
+    new SoundNotifications(respawmTimer, 3, beepAudio),
+    new SoundNotifications(respawmTimer, 10, tenSecondsAudio),
+    new SoundNotifications(respawmTimer, 20, twentySecondsAudio),
+]
+updateSounds();
 speakerIconElement.classList = SPEAKER_MUTE;
 
+updateSimpleUI();
 SetUpEventListeners();
-setInterval(update, 1000);
+setInterval(update, updateRate);
 update(); // Initialize immediately
 
 const loadOpenCvScript = () => {
