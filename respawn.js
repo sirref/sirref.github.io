@@ -155,7 +155,7 @@ const ROIS = [
 // let timeBetweenRespawn = 0;
 let volume = 0;
 // let clock = null;
-let simpleUI = Boolean(parseInt(localStorage.getItem("simpleUI")) || 0);
+let simpleUI = localStorage.getItem("simpleUI") == "true";
 
 const clock = new RealClock(0);
 //const clock = new SimulatedClock(20 * 60, 1);
@@ -339,6 +339,7 @@ function OnOpenModalButtonClicked() {
     document.getElementById("enableBeep3").checked = soundToggles[3];
     document.getElementById("enableBeep10").checked = soundToggles[4];
     document.getElementById("enableBeep20").checked = soundToggles[5];
+    simpleUICheckbox.checked = simpleUI;
     soundSlider.value = volume * 100;
 }
 
