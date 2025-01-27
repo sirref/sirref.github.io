@@ -464,7 +464,6 @@ function updateDisplay() {
 
         // Toggle visibility of controls
         toggleControlsVisibility(true);
-
     } else {
         toggleControlsVisibility(false);
     }
@@ -550,7 +549,9 @@ function showControl(control) {
 function update() {
     //console.log("update called");
     updateDisplay();
-    soundsManager.forEach(element => { element.update(); });
+    if (gameTimer.getStage() == STAGES.WAR) {
+        soundsManager.forEach(element => { element.update(); });
+    }
     caller.update();
 }
 
