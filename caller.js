@@ -71,6 +71,7 @@ export class Caller {
     }
 
     toggleJump() {
+        this.manual = true;
         this.phase = this.gameTimer.getPhase();
         this.setJumped(!this.respawnTimer.isJumped());
     }

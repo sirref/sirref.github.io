@@ -230,8 +230,6 @@ function OnAltTimerCheckClicked() {
     } else {
         gameTimer.changeStageTimes(MODE1_STAGES);
     }
-
-    //console.log("Mode changed: " + JSON.stringify(mode));
 }
 
 function OnVolumeSliderChanged(target) {
@@ -440,7 +438,6 @@ const SPEAKER_VOL_LOW = "bi bi-volume-down";
 const aduioElements = [beepAudio, respawnAudio, tenSecondsAudio, twentySecondsAudio];
 
 function updateArrows() {
-    console.log("updatearrows");
     if (respawmTimer.isJumped()) {
         arrowLeft.classList = '';
         arrowRight.classList = 'bi bi-arrow-right arrow'
@@ -547,7 +544,6 @@ function showControl(control) {
 }
 
 function update() {
-    //console.log("update called");
     updateDisplay();
     if (gameTimer.getStage() == STAGES.WAR) {
         soundsManager.forEach(element => { element.update(); });
