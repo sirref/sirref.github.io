@@ -1,3 +1,54 @@
+<!--<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capture</title>
+    <script async src="https://docs.opencv.org/4.x/opencv.js" onload="checkOpenCVReady();"></script>
+    <style>
+        body {
+            text-align: center;
+            background-color: #222;
+        }
+
+        video {
+            border: 2px solid green;
+            width: 80%;
+            max-width: 800px;
+            height: auto;
+            margin-top: 20px;
+        }
+    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="row d-flex justify-content-end align-items-center pt-3">
+        <div class="col-3 d-flex align-items-center">
+            <button id="record" class="btn btn-primary"><i class="bi bi-record-circle"></i></button>
+        </div>
+    </div>
+    <h1>HUH</h1>>
+
+    <video id="video" autoplay></video>
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas" hidden></canvas>
+
+
+    <script type="module" src="./capture.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function checkOpenCVReady() {
+            cv = await cv;
+        }
+    </script>
+</body>
+
+</html>
+-->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,93 +56,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Screen Capture Preview</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        #capturePreview {
-            height: 300px;
-            background-color: #f8f9fa;
-            border: 2px dashed #6c757d;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #6c757d;
-            font-size: 1.5rem;
-            position: relative;
-            overflow: hidden;
+        video {
+            border: 2px solid green;
+            width: 80%;
+            max-width: 800px;
+            height: auto;
+            margin-top: 20px;
         }
 
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        canvas {
+            border: 2px solid green;
+            width: 80%;
+            max-width: 800px;
+            height: auto;
+            margin-top: 20px;
         }
     </style>
+    <script async src="https://docs.opencv.org/4.x/opencv.js" onload="checkOpenCVReady();"></script>
+    <script>
+        async function checkOpenCVReady() {
+            cv = await cv;
+        }
+    </script>
 </head>
 
 <body>
-    <div class="container mt-5">
-        <div class="row">
-            <!-- Start/Stop Capture Button -->
-            <div class="col-12 text-center">
-                <button id="captureButton" class="btn btn-primary btn-lg">Start Capture</button>
-            </div>
-        </div>
-        <div class="row mt-4">
-            <!-- Capture Preview Window -->
-            <div class="col-12">
-                <div id="capturePreview" class="text-center">
-                    <span>Capture Preview</span>
-                </div>
-            </div>
-        </div>
-    </div>
+    <h1>Screen Capture Preview</h1>
+    <button id="record">Start Screen Capture</button>
+    <video id="video" autoplay></video>
+    <canvas id="canvas" hidden></canvas>
+    <canvas id="processedCanvas"></canvas>
 
-    <!-- Bootstrap JS (Optional) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Custom JavaScript -->
-    <script>
-        const captureButton = document.getElementById('captureButton');
-        const capturePreview = document.getElementById('capturePreview');
-        let isCapturing = false;
-        let stream = null;
-
-        captureButton.addEventListener('click', async () => {
-            if (!isCapturing) {
-                try {
-                    // Start screen capture
-                    stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-
-                    // Create a video element for preview
-                    const video = document.createElement('video');
-                    video.srcObject = stream;
-                    video.autoplay = true;
-                    video.muted = true;
-
-                    // Clear previous content and show video
-                    capturePreview.innerHTML = '';
-                    capturePreview.appendChild(video);
-
-                    // Update button state
-                    captureButton.textContent = 'Stop Capture';
-                    isCapturing = true;
-                } catch (err) {
-                    console.error('Error starting screen capture:', err);
-                }
-            } else {
-                // Stop screen capture
-                if (stream) {
-                    const tracks = stream.getTracks();
-                    tracks.forEach(track => track.stop());
-                }
-
-                // Reset preview and button state
-                capturePreview.innerHTML = '<span>Capture Preview</span>';
-                captureButton.textContent = 'Start Capture';
-                isCapturing = false;
-            }
-        });
-    </script>
+    <script type="module" src="./capture.js"></script>
 </body>
 
 </html>

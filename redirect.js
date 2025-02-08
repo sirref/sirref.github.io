@@ -3,7 +3,7 @@ function OnDocumentKeydown(event) {
         window.location.href = './leaderboard.html';
     } else if (event.code == 'KeyR') {
         window.location.href = './respawn.html';
-    } else if (event.altKey && event.code == "KeyC") {
+    } else if (event.code == "KeyC") {
         window.location.href = './capture.html';
     } else if (event.code == 'KeyT') {
         window.location.href = './test.html';

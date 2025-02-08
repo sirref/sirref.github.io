@@ -1,0 +1,153 @@
+{
+    "roi": [
+        {
+            "name": "A",
+            "crop": {
+                "x": 879,
+                "y": 63,
+                "w": 40,
+                "h": 40
+            },
+            "mask": {
+                "include": [
+                    {
+                        "type": "circle",
+                        "center": {
+                            "x": 899,
+                            "y": 83
+                        },
+                        "radius": 20
+                    }
+                ],
+                "exclude": [
+                    {
+                        "type": "circle",
+                        "center": {
+                            "x": 899,
+                            "y": 83
+                        },
+                        "radius": 15
+                    }
+                ]
+            },
+            "range": {
+                "enemy": {
+                    "min": [
+                        340,
+                        65,
+                        50
+                    ],
+                    "max": [
+                        360,
+                        100,
+                        100
+                    ]
+                },
+                "friendly": {
+                    "min": [
+                        180,
+                        50,
+                        40
+                    ],
+                    "max": [
+                        240,
+                        100,
+                        100
+                    ]
+                }
+            }
+        },
+        {
+            "name": "B",
+            "crop": {
+                "x": 939,
+                "y": 63,
+                "w": 40,
+                "h": 40
+            },
+            "mask": {
+                "include": [
+                    {
+                        "type": "circle",
+                        "center": {
+                            "x": 959,
+                            "y": 83
+                        },
+                        "radius": 20
+                    }
+                ],
+                "exclude": [
+                    {
+                        "type": "circle",
+                        "center": {
+                            "x": 959,
+                            "y": 83
+                        },
+                        "radius": 15
+                    }
+                ]
+            }
+        },
+        {
+            "name": "C",
+            "crop": {
+                "x": 999,
+                "y": 63,
+                "w": 40,
+                "h": 40
+            },
+            "mask": {
+                "include": [
+                    {
+                        "type": "circle",
+                        "center": {
+                            "x": 1019,
+                            "y": 83
+                        },
+                        "radius": 20
+                    }
+                ],
+                "exclude": [
+                    {
+                        "type": "circle",
+                        "center": {
+                            "x": 1019,
+                            "y": 83
+                        },
+                        "radius": 15
+                    }
+                ]
+            }
+        }
+    ],
+    "coi": {
+        "enemy": {
+            "min": [
+                0,
+                127,
+                127,
+                0
+            ],
+            "max": [
+                360,
+                255,
+                255,
+                0
+            ]
+        },
+        "friendly": {
+            "min": [
+                0,
+                127,
+                127,
+                0
+            ],
+            "max": [
+                360,
+                255,
+                255,
+                0
+            ]
+        }
+    }
+}

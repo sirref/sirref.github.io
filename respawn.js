@@ -51,89 +51,6 @@ const JUMP_ADJUSTMENT = 8;
 
 const NO_RESPAWNS_REMAINING = "No respawns remaining"
 
-const COIS = {
-    "enemy": {
-        min: (340, 65, 50),
-        max: (360, 100, 100)
-    },
-    "friendly": {
-        min: (180, 50, 40),
-        max: (240, 100, 100)
-    }
-};
-const ROIS = [
-    {
-        name: "A",
-        crop: { x: 879, y: 63, w: 40, h: 40 },
-        mask: {
-            include: [
-                {
-                    type: "circle",
-                    center: { x: 899, y: 83 },
-                    radius: 20
-                }
-            ],
-            exclude: [
-                {
-                    type: "circle",
-                    center: { x: 899, y: 83 },
-                    radius: 15
-                }
-            ]
-        },
-        range: {
-            "enemy": {
-                min: (340, 65, 50),
-                max: (360, 100, 100)
-            },
-            "friendly": {
-                min: (180, 50, 40),
-                max: (240, 100, 100)
-            }
-        }
-    },
-    {
-        name: "B",
-        crop: { x: 939, y: 63, w: 40, h: 40 },
-        mask: {
-            include: [
-                {
-                    type: "circle",
-                    center: { x: 959, y: 83 },
-                    radius: 20
-                }
-            ],
-            exclude: [
-                {
-                    type: "circle",
-                    center: { x: 959, y: 83 },
-                    radius: 15
-                }
-            ]
-        }
-    },
-    {
-        name: "C",
-        crop: { x: 999, y: 63, w: 40, h: 40 },
-        mask: {
-            include: [
-                {
-                    type: "circle",
-                    center: { x: 1019, y: 83 },
-                    radius: 20
-                }
-            ],
-            exclude: [
-                {
-                    type: "circle",
-                    center: { x: 1019, y: 83 },
-                    radius: 20
-                }
-            ]
-        }
-    }
-];
-
 
 // -----------------------------------------------------------------------------
 // Variables
@@ -162,8 +79,8 @@ const clock = new RealClock(0);
 const gameTimer = new GameTimer(clock, MODE1_STAGES, PHASE_TIMES);
 const respawmTimer = new RespawnTimer(gameTimer, RESPAWN_TIMES, RESPAWN_INTERVALS, JUMP_ADJUSTMENT);
 const caller = new Caller(respawmTimer, gameTimer);
-let watcher = null
-
+let watcher = null;
+let mediaStream = null;
 // -----------------------------------------------------------------------------
 // UI Variables
 // -----------------------------------------------------------------------------
@@ -341,10 +258,6 @@ function OnOpenModalButtonClicked() {
     soundSlider.value = volume * 100;
 }
 
-function OnSimpleUICheckboxClicked() {
-
-}
-
 function OnRecordClicked() {
     if (mediaStream) {
         stopScreenCapture();
@@ -352,6 +265,8 @@ function OnRecordClicked() {
         startScreenCapture();
     }
 }
+
+
 
 export async function onOpenCvReady() {
     window.cv = await window.cv;
@@ -401,7 +316,7 @@ function SetUpEventListeners() {
     captureButtonB.addEventListener('click', event => { OnCaptureButtonClicked(event.target); });
     captureButtonC.addEventListener('click', event => { OnCaptureButtonClicked(event.target); });
     soundSlider.addEventListener('input', OnVolumeSliderChanged);
-
+    recordButton.addEventListener('click', OnRecordClicked);
 }
 // -----------------------------------------------------------------------------
 // MVC
@@ -430,6 +345,7 @@ const twentySecondsAudio = document.getElementById("twentySeconds");
 const speakerIconElement = document.getElementById("speakerIcon");
 const arrowLeft = document.getElementById("arrowLeft");
 const arrowRight = document.getElementById("arrowRight");
+const recordButton = document.getElementById("record");
 
 const SPEAKER_MUTE = "bi bi-volume-mute";
 const SPEAKER_VOL_HIGH = "bi bi-volume-up";
