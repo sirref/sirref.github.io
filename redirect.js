@@ -7,6 +7,10 @@ function OnDocumentKeydown(event) {
         window.location.href = './capture.html';
     } else if (event.code == 'KeyT') {
         window.location.href = './test.html';
+    } else if (event.code == 'KeyW') {
+        window.location.href = './warreport.html';
+    } else if (event.code == 'KeyP') {
+        window.location.href = './playerreport.html';
     }
 
 }
