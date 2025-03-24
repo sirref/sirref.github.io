@@ -1,13 +1,31 @@
 import { GSDB } from "./gsdb.js";
 
 const sheetId = "14byZyCAX_N_AA-y_1tv4CLtgTCaOB-Zq8QbOHmavE6Y";
-const lbSheetName = "leaderboards";
-const lbdb = new GSDB(sheetId, lbSheetName);
-const warDb = new GSDB(sheetId, "wars")
+const leadboardSheet = "leaderboards"
+const warSheet = "wars"
+const companiesSheet = "companies"
+const db = new GSDB(sheetId);
+
+const companies = await db.query(companiesSheet, "SELECT A, B WHERE A IS NOT NULL");
 
 const leadboardQuery = "SELECT D, B, E, F, G, H, I, J, K where C={warId}";
 const TABLE_HEADER = ["rank", "name", "score", "kills", "deaths", "assists", "healing", "damage", "team"];
 const warsQuery = "SELECT A, B, C, D, E"
+
+const COVENANT_STYLE = { background: "goldenrod", color: "black" };
+const MARAUDER_STYLE = { background: "#38761d", color: "white" };
+const SYNDICATE_STYLE = { background: "#674ea7", color: "white" };
+
+const STYLES = { "Covenant": COVENANT_STYLE, "Marauder": MARAUDER_STYLE, "Syndicate": SYNDICATE_STYLE };
+
+function getCompanyFaction(companies, company) {
+    for (let entry of companies) {
+        if (entry[0] == company) {  // Compare entry[0] with the company parameter
+            return entry[1];  // Return the faction associated with the company
+        }
+    }
+    return null;  // Return null if company is not found
+}
 
 // Convert array of arrays into array of objects
 function dataAsRecords(data) {
@@ -58,14 +76,23 @@ async function setupTable(data) {
         columns: TABLE_HEADER.map(key => ({
             title: key.charAt(0).toUpperCase() + key.slice(1),
             field: key
-        }))
+        })),
+        rowFormatter: function (row) {
+            const team = row.getData().team;
+            const faction = getCompanyFaction(companies, team);
+            if (faction) {
+                const style = STYLES[faction]
+                row.getElement().style.background = style.background;
+                row.getElement().style.color = style.color;
+            }
+        }
     });
 }
 
 const warDropdown = document.getElementById("war-select");
 
 async function loadWars() {
-    let data = await warDb.query(warsQuery);
+    let data = await db.query(warSheet, warsQuery);
     data.reverse();
     data.forEach(row => {
         const [id, date, territory, attacker, defender] = row;
@@ -80,7 +107,7 @@ async function loadWars() {
 
 async function onWarDropdownChange(event) {
     const warId = event.target.value;
-    const data = await lbdb.query(leadboardQuery.replace("{warId}", warId));
+    const data = await db.query(leadboardSheet, leadboardQuery.replace("{warId}", warId));
     setupTable(data);
 }
 

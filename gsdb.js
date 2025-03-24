@@ -7,15 +7,14 @@ const STR_QUERY = "{query}"
 export class GSDB {
 
 
-    constructor(sheetId, sheetName) {
+    constructor(sheetId) {
         this.sheetId = sheetId
-        this.sheetName = sheetName
     }
 
-    async query(query) {
+    async query(sheetName, query) {
         const encodedQuery = encodeURIComponent(query)
         const fullUrl = BASE_URL.replace(STR_SHEETID, this.sheetId)
-            .replace(STR_SHEETNAME, this.sheetName)
+            .replace(STR_SHEETNAME, sheetName)
             .replace(STR_QUERY, encodedQuery)
 
         const response = await fetch(fullUrl)
