@@ -9,7 +9,8 @@ const db = new GSDB(sheetId);
 const companies = await db.query(companiesSheet, "SELECT A, B WHERE A IS NOT NULL");
 
 const leadboardQuery = "SELECT D, B, E, F, G, H, I, J, K where C={warId}";
-const TABLE_HEADER = ["rank", "name", "score", "kills", "deaths", "assists", "healing", "damage", "team"];
+const TABLE_HEADER = ["rank", "name", "score", "kills", "deaths", "assists", "healing", "damage", "company"];
+const SUMMARY_HEADER = ["company", "kills", "deaths", "assists", "healing", "damage", "dpk", "apk"];
 const warsQuery = "SELECT A, B, C, D, E"
 
 const COVENANT_STYLE = { background: "goldenrod", color: "black" };
@@ -17,6 +18,60 @@ const MARAUDER_STYLE = { background: "#38761d", color: "white" };
 const SYNDICATE_STYLE = { background: "#674ea7", color: "white" };
 
 const STYLES = { "Covenant": COVENANT_STYLE, "Marauder": MARAUDER_STYLE, "Syndicate": SYNDICATE_STYLE };
+const LEADERBOARD_COLUMNS = [
+    { title: "Rank", field: "rank" },
+    { title: "Name", field: "name" },
+    {
+        title: "Score",
+        field: "score",
+        formatter: cell => cell.getValue().toLocaleString(undefined, { maximumFractionDigits: 0 })
+    },
+    { title: "Kills", field: "kills" },
+    { title: "Deaths", field: "deaths" },
+    { title: "Assists", field: "assists" },
+    {
+        title: "Healing",
+        field: "healing",
+        formatter: cell => cell.getValue().toLocaleString(undefined, { maximumFractionDigits: 0 })
+    },
+    {
+        title: "Damage",
+        field: "damage",
+        formatter: cell => cell.getValue().toLocaleString(undefined, { maximumFractionDigits: 0 })
+    },
+    { title: "Company", field: "company" },
+];
+
+const SUMMARY_COLUMNS = [
+    { title: "Company", field: "company" },
+    { title: "Kills", field: "kills" },
+    { title: "Deaths", field: "deaths" },
+    {
+        title: "Assists",
+        field: "assists",
+        formatter: cell => cell.getValue().toLocaleString()
+    },
+    {
+        title: "Healing",
+        field: "healing",
+        formatter: cell => cell.getValue().toLocaleString()
+    },
+    {
+        title: "Damage",
+        field: "damage",
+        formatter: cell => cell.getValue().toLocaleString()
+    },
+    {
+        title: "DPK",
+        field: "dpk",
+        formatter: cell => cell.getValue().toLocaleString(undefined, { maximumFractionDigits: 0 })
+    },
+    {
+        title: "APK",
+        field: "apk",
+        formatter: cell => cell.getValue().toFixed(2)
+    }
+];
 
 function getCompanyFaction(companies, company) {
     for (let entry of companies) {
@@ -53,6 +108,15 @@ function parseDateString(date_string) {
     }
 }
 
+function rowColorFormatter(row) {
+    const company = row.getData().company;
+    const faction = getCompanyFaction(companies, company);
+    if (faction) {
+        const style = STYLES[faction]
+        row.getElement().style.background = style.background;
+        row.getElement().style.color = style.color;
+    }
+}
 function formatDateToMMDDYYYY(date) {
     const month = date.getMonth() + 1;  // Months are zero-based, so add 1
     const day = date.getDate();
@@ -65,27 +129,53 @@ function formatDateToMMDDYYYY(date) {
     return `${formattedMonth}/${formattedDay}/${year}`;
 }
 
+function summarizeData(companies, leaderboard) {
+    let summary = {}
+    for (let company of companies) {
+        summary[company] = {
+            "company": company,
+            "kills": 0,
+            "deaths": 0,
+            "assists": 0,
+            "healing": 0,
+            "damage": 0,
+            "dpk": 0.0,
+            "apk": 0.0
+        };
+    }
+    for (let row of leaderboard) {
+        const company = row[8];
+        summary[company]["kills"] += row[3];
+        summary[company]["deaths"] += row[4];
+        summary[company]["assists"] += row[5];
+        summary[company]["healing"] += row[6];
+        summary[company]["damage"] += row[7];
+    }
+
+    for (let company of companies) {
+        summary[company]["dpk"] = summary[company]["damage"] / summary[company]["kills"];
+        summary[company]["apk"] = summary[company]["assists"] / summary[company]["kills"];
+    }
+
+    return Object.values(summary);
+}
+
+async function setupSummaryTable(data) {
+    new Tabulator("#summary-table", {
+        data: data,
+        layout: "fitColumns",
+        columns: SUMMARY_COLUMNS,
+        rowFormatter: rowColorFormatter
+    });
+}
 
 // Use an async function to await data
 async function setupTable(data) {
-    const tabulatorData = dataAsRecords(data);
-
-    new Tabulator("#example-table", {
-        data: tabulatorData,
+    new Tabulator("#leaderboard-table", {
+        data: data,
         layout: "fitColumns",
-        columns: TABLE_HEADER.map(key => ({
-            title: key.charAt(0).toUpperCase() + key.slice(1),
-            field: key
-        })),
-        rowFormatter: function (row) {
-            const team = row.getData().team;
-            const faction = getCompanyFaction(companies, team);
-            if (faction) {
-                const style = STYLES[faction]
-                row.getElement().style.background = style.background;
-                row.getElement().style.color = style.color;
-            }
-        }
+        columns: LEADERBOARD_COLUMNS,
+        rowFormatter: rowColorFormatter
     });
 }
 
@@ -108,7 +198,11 @@ async function loadWars() {
 async function onWarDropdownChange(event) {
     const warId = event.target.value;
     const data = await db.query(leadboardSheet, leadboardQuery.replace("{warId}", warId));
-    setupTable(data);
+    const companies = (await db.query(warSheet, "SELECT D, E WHERE A=" + warId))[0]
+    const summary = await summarizeData(companies, data);
+    const leaderboard = await dataAsRecords(data);
+    setupTable(leaderboard);
+    setupSummaryTable(summary);
 }
 
 function setUpListeners() {
@@ -117,3 +211,5 @@ function setUpListeners() {
 
 setUpListeners();
 loadWars();
+setupTable(null);
+setupSummaryTable(null)
