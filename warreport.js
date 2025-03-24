@@ -4,6 +4,7 @@ const sheetId = "14byZyCAX_N_AA-y_1tv4CLtgTCaOB-Zq8QbOHmavE6Y";
 const leadboardSheet = "leaderboards"
 const warSheet = "wars"
 const companiesSheet = "companies"
+const groupsSheet = "groups"
 const db = new GSDB(sheetId);
 
 const companies = await db.query(companiesSheet, "SELECT A, B WHERE A IS NOT NULL");
@@ -72,6 +73,49 @@ const SUMMARY_COLUMNS = [
         formatter: cell => cell.getValue().toFixed(2)
     }
 ];
+
+const GROUPS_COLUMNS = [
+    { title: "Name", field: "name" },
+    {
+        title: "Score",
+        field: "score",
+        formatter: cell => cell.getValue().toLocaleString(undefined, { maximumFractionDigits: 0 }),
+        bottomCalc: bottomCalcFunction
+    },
+    {
+        title: "Kills",
+        field: "kills",
+        bottomCalc: bottomCalcFunction
+    },
+    {
+        title: "Deaths",
+        field: "deaths",
+        bottomCalc: bottomCalcFunction
+    },
+    {
+        title: "Assists",
+        field: "assists",
+        bottomCalc: bottomCalcFunction
+    },
+    {
+        title: "Healing",
+        field: "healing",
+        formatter: cell => cell.getValue().toLocaleString(undefined, { maximumFractionDigits: 0 }),
+        bottomCalc: bottomCalcFunction
+    },
+    {
+        title: "Damage",
+        field: "damage",
+        formatter: cell => cell.getValue().toLocaleString(undefined, { maximumFractionDigits: 0 }),
+        bottomCalc: bottomCalcFunction
+    }
+];
+
+function bottomCalcFunction(values, data, calcParams) {
+    var sum = 0;
+    values.forEach(v => { sum += typeof v === "number" ? v : 0; });
+    return sum.toLocaleString();
+}
 
 function getCompanyFaction(companies, company) {
     for (let entry of companies) {
@@ -160,6 +204,61 @@ function summarizeData(companies, leaderboard) {
     return Object.values(summary);
 }
 
+async function createGroupTables(leaderboard, groups) {
+    let tables = {}
+
+    // Create tables by grouping leaderboard entries
+    for (let row of leaderboard) {
+        const player = row.name;
+        for (let entry of groups) {
+            if (entry[0].toLowerCase() == player.toLowerCase()) {
+                const group_nb = entry[2];
+                if (!(group_nb in tables)) {
+                    tables[group_nb] = []
+                }
+                tables[group_nb].push(row);
+            }
+        }
+    }
+
+    // Check for tables with 4 rows and add a dummy last row
+    for (let t of Object.keys(tables)) {
+        if (tables[t].length == 4) {
+            let lastRowCopy = { ...tables[t].slice(-1)[0] };  // Make a copy of the last row
+
+            // Clear the data in the last row copy
+            for (let key in lastRowCopy) {
+                lastRowCopy[key] = ""; // Set each column's value to an empty string
+            }
+
+            tables[t].push(lastRowCopy);  // Add the dummy last row to the table
+        }
+    }
+
+    return tables;
+}
+
+
+async function setupGrousTable(data) {
+    for (let group of Object.keys(data)) {
+        const tableName = `#group-${group}`;
+        const tableData = data[group];
+        new Tabulator(tableName, {
+            data: tableData,
+            layout: "fitColumns",
+            columns: GROUPS_COLUMNS,
+            rowFormatter: function (row) {
+                if (row._row.type == "row") {
+                    let isEvenRow = row.getPosition() % 2 === 0;
+                    let goldenrodColor = "#DAA520";
+                    let lighterGoldenrodColor = "#F4E1A1";
+                    row.getElement().style.backgroundColor = isEvenRow ? goldenrodColor : lighterGoldenrodColor;
+                }
+            }
+        });
+    }
+}
+
 async function setupSummaryTable(data) {
     new Tabulator("#summary-table", {
         data: data,
@@ -195,21 +294,44 @@ async function loadWars() {
     });
 }
 
+async function updateButtons(companies, styles) {
+
+}
+
+async function parseArgs() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+        warId: params.get('wid')
+    };
+}
+
 async function onWarDropdownChange(event) {
     const warId = event.target.value;
     const data = await db.query(leadboardSheet, leadboardQuery.replace("{warId}", warId));
+    const groups_data = await db.query(groupsSheet, "SELECT A, B, C WHERE B=" + warId);
     const companies = (await db.query(warSheet, "SELECT D, E WHERE A=" + warId))[0]
     const summary = await summarizeData(companies, data);
     const leaderboard = await dataAsRecords(data);
+    const groups = await createGroupTables(leaderboard, groups_data);
     setupTable(leaderboard);
     setupSummaryTable(summary);
+    setupGrousTable(groups);
 }
 
 function setUpListeners() {
     warDropdown.addEventListener("change", onWarDropdownChange)
 }
 
+async function setWar() {
+    const args = await parseArgs();
+    if (args.warId) {
+        warDropdown.value = args.warId;
+        warDropdown.dispatchEvent(new Event("change"));
+    }
+}
+
 setUpListeners();
-loadWars();
+await loadWars();
 setupTable(null);
 setupSummaryTable(null)
+setWar()

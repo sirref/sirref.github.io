@@ -25,14 +25,52 @@
             <option value="" selected disabled>Select a War</option>
         </select>
     </div>
+
     <div class="container mx-auto p-4">
         <div class="mb-8">
             <h2 class="text-2xl font-semibold mb-4 text-center">Summary</h2>
             <div id="summary-table" class="shadow-lg rounded-lg overflow-hidden bg-white"></div>
         </div>
+        <h2 class="text-2xl font-semibold mb-4 text-center">Groups</h2>
+        <div class="grid grid-cols-2 gap-4 mb-8">
+            <!-- Left column -->
+            <div class="space-y-2">
+                <div id="group-1" class="bg-gray-100 p-2 rounded">Item 1</div>
+                <div id="group-2" class="bg-gray-100 p-2 rounded">Item 2</div>
+                <div id="group-3" class="bg-gray-100 p-2 rounded">Item 3</div>
+                <div id="group-4" class="bg-gray-100 p-2 rounded">Item 4</div>
+                <div id="group-5" class="bg-gray-100 p-2 rounded">Item 5</div>
+                <div id="group-11" class="bg-gray-100 p-2 rounded">Item 6</div>
+            </div>
+
+            <!-- Right column -->
+            <div class="space-y-2">
+                <div id="group-6" class="bg-gray-100 p-2 rounded">Item 7</div>
+                <div id="group-7" class="bg-gray-100 p-2 rounded">Item 8</div>
+                <div id="group-8" class="bg-gray-100 p-2 rounded">Item 9</div>
+                <div id="group-9" class="bg-gray-100 p-2 rounded">Item 10</div>
+                <div id="group-10" class="bg-gray-100 p-2 rounded">Item 11</div>
+                <div id="group-12" class="bg-gray-100 p-2 rounded">Item 12</div>
+            </div>
+        </div>
+
 
         <div>
             <h2 class="text-2xl font-semibold mb-4 text-center">Leaderboard</h2>
+            <div class="flex space-x-4 mb-4">
+                <button id="btn-all" disabled
+                    class="bg-gray-500 text-white font-semibold py-2 px-4 rounded cursor-not-allowed opacity-50">
+                    All
+                </button>
+                <button id="btn-company1" disabled
+                    class="bg-gray-500 text-white font-semibold py-2 px-4 rounded cursor-not-allowed opacity-50">
+                    Company1
+                </button>
+                <button id="btn-company2" disabled
+                    class="bg-gray-500 text-white font-semibold py-2 px-4 rounded cursor-not-allowed opacity-50">
+                    Company2
+                </button>
+            </div>
             <div id="leaderboard-table" class="shadow-lg rounded-lg overflow-hidden bg-white"></div>
         </div>
     </div>
