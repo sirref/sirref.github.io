@@ -246,15 +246,7 @@ async function setupGrousTable(data) {
         new Tabulator(tableName, {
             data: tableData,
             layout: "fitColumns",
-            columns: GROUPS_COLUMNS,
-            rowFormatter: function (row) {
-                if (row._row.type == "row") {
-                    let isEvenRow = row.getPosition() % 2 === 0;
-                    let goldenrodColor = "#DAA520";
-                    let lighterGoldenrodColor = "#F4E1A1";
-                    row.getElement().style.backgroundColor = isEvenRow ? goldenrodColor : lighterGoldenrodColor;
-                }
-            }
+            columns: GROUPS_COLUMNS
         });
     }
 }
