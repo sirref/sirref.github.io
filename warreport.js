@@ -17,6 +17,20 @@ const warsQuery = "SELECT A, B, C, D, E"
 const COVENANT_STYLE = { background: "goldenrod", color: "black" };
 const MARAUDER_STYLE = { background: "#38761d", color: "white" };
 const SYNDICATE_STYLE = { background: "#674ea7", color: "white" };
+const NULL_GROUPS = {
+    1: null,
+    2: null,
+    3: null,
+    4: null,
+    5: null,
+    6: null,
+    7: null,
+    8: null,
+    9: null,
+    10: null,
+    11: null,
+    12: null
+}
 
 const STYLES = { "Covenant": COVENANT_STYLE, "Marauder": MARAUDER_STYLE, "Syndicate": SYNDICATE_STYLE };
 const LEADERBOARD_COLUMNS = [
@@ -326,4 +340,5 @@ setUpListeners();
 await loadWars();
 setupTable(null);
 setupSummaryTable(null)
+setupGrousTable(NULL_GROUPS)
 setWar()
