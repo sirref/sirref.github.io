@@ -13,7 +13,7 @@ const leadboardQuery = "SELECT D, B, E, F, G, H, I, J, K where C={warId}";
 const TABLE_HEADER = ["rank", "name", "score", "kills", "deaths", "assists", "healing", "damage", "company"];
 const SUMMARY_HEADER = ["company", "kills", "deaths", "assists", "healing", "damage", "dpk", "apk"];
 const warsQuery = "SELECT A, B, C, D, E"
-
+let leaderboardTable = null;
 const COVENANT_STYLE = { background: "goldenrod", color: "black" };
 const MARAUDER_STYLE = { background: "#38761d", color: "white" };
 const SYNDICATE_STYLE = { background: "#674ea7", color: "white" };
@@ -338,7 +338,7 @@ async function setupSummaryTable(data) {
 
 // Use an async function to await data
 async function setupTable(data) {
-    new Tabulator("#leaderboard-table", {
+    leaderboardTable = new Tabulator("#leaderboard-table", {
         data: data,
         layout: "fitColumns",
         columns: LEADERBOARD_COLUMNS,
@@ -396,6 +396,17 @@ async function getStylesForCompanies(companies) {
     return styles;
 }
 
+async function onCompanyButtonClicked(event) {
+    console.log(event)
+    if (leaderboardTable) {
+        if (event.target.innerText.toLowerCase() == "all") {
+            leaderboardTable.clearFilter();
+        } else {
+            leaderboardTable.setFilter("company", "=", event.target.innerText);
+        }
+    }
+}
+
 async function updateButtons(comapnyNames, styles) {
     const [company1Name, company2Name] = comapnyNames;
 
@@ -413,6 +424,7 @@ async function updateButtons(comapnyNames, styles) {
     buttons.forEach(button => {
         button.disabled = false;
         button.classList.remove("cursor-not-allowed", "opacity-50");
+        button.addEventListener("click", onCompanyButtonClicked);
     });
 }
 
