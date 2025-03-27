@@ -54,6 +54,15 @@ const LEADERBOARD_COLUMNS = [
         field: "damage",
         formatter: cell => cell.getValue().toLocaleString(undefined, { maximumFractionDigits: 0 })
     },
+    {
+        title: "KP",
+        field: "kpar",
+        formatter: cell => cell.getValue().toLocaleString(undefined, {
+            style: 'percent',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        })
+    },
     { title: "Company", field: "company" },
 ];
 
