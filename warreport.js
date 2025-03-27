@@ -189,7 +189,7 @@ function dataAsRecords(data) {
 
 function getCompanySummary(summary, companyName) {
     for (let record of summary) {
-        if (record.company = companyName) {
+        if (record.company == companyName) {
             return record
         }
     }
