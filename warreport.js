@@ -7,7 +7,7 @@ const companiesSheet = "companies"
 const groupsSheet = "groups"
 const db = new GSDB(sheetId);
 
-const companies = await db.query(companiesSheet, "SELECT A, B WHERE A IS NOT NULL");
+const COMPANIES = await db.query(companiesSheet, "SELECT A, B WHERE A IS NOT NULL");
 
 const leadboardQuery = "SELECT D, B, E, F, G, H, I, J, K where C={warId}";
 const TABLE_HEADER = ["rank", "name", "score", "kills", "deaths", "assists", "healing", "damage", "company"];
@@ -94,41 +94,81 @@ const GROUPS_COLUMNS = [
         title: "Score",
         field: "score",
         formatter: cell => cell.getValue().toLocaleString(undefined, { maximumFractionDigits: 0 }),
-        bottomCalc: bottomCalcFunction
+        bottomCalc: bottomCalcFunction,
+        bottomCalcParams: { function: "sum" }
     },
     {
         title: "Kills",
         field: "kills",
-        bottomCalc: bottomCalcFunction
+        bottomCalc: bottomCalcFunction,
+        bottomCalcParams: { function: "sum" }
     },
     {
         title: "Deaths",
         field: "deaths",
-        bottomCalc: bottomCalcFunction
+        bottomCalc: bottomCalcFunction,
+        bottomCalcParams: { function: "sum" }
     },
     {
         title: "Assists",
         field: "assists",
-        bottomCalc: bottomCalcFunction
+        bottomCalc: bottomCalcFunction,
+        bottomCalcParams: { function: "sum" }
     },
     {
         title: "Healing",
         field: "healing",
         formatter: cell => cell.getValue().toLocaleString(undefined, { maximumFractionDigits: 0 }),
-        bottomCalc: bottomCalcFunction
+        bottomCalc: bottomCalcFunction,
+        bottomCalcParams: { function: "sum" }
     },
     {
         title: "Damage",
         field: "damage",
         formatter: cell => cell.getValue().toLocaleString(undefined, { maximumFractionDigits: 0 }),
-        bottomCalc: bottomCalcFunction
+        bottomCalc: bottomCalcFunction,
+        bottomCalcParams: { function: "sum" }
+    },
+    {
+        title: "KP",
+        field: "kpar",
+        formatter: cell => cell.getValue().toLocaleString(undefined, {
+            style: 'percent',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }),
+        bottomCalc: bottomCalcFunction,
+        bottomCalcParams: { function: "mean" }
     }
 ];
 
 function bottomCalcFunction(values, data, calcParams) {
+    let value = 0;
+    const fn = calcParams["function"]
+    if (fn == "sum") {
+        value = bottomCalcSum(values, data, calcParams);
+        return value.toLocaleString();
+    } else if (fn == "mean") {
+        value = bottomCalcMean(values, data, calcParams);
+        return value.toLocaleString(undefined, {
+            style: 'percent',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        });
+    }
+}
+
+function bottomCalcSum(values, data, calcParams) {
     var sum = 0;
     values.forEach(v => { sum += typeof v === "number" ? v : 0; });
-    return sum.toLocaleString();
+    return sum
+}
+
+function bottomCalcMean(values, data, calcParams) {
+    if (values.length > 0) {
+        return bottomCalcSum(values, data, calcParams) / values.length;
+    }
+    return 0;
 }
 
 function getCompanyFaction(companies, company) {
@@ -145,6 +185,28 @@ function dataAsRecords(data) {
     return data.map(row =>
         Object.fromEntries(TABLE_HEADER.map((key, i) => [key, row[i]]))
     );
+}
+
+function getCompanySummary(summary, companyName) {
+    for (let record of summary) {
+        if (record.company = companyName) {
+            return record
+        }
+    }
+    return null
+}
+
+function calculateKP(leaderboard, summary) {
+    for (let entry of leaderboard) {
+        const company = entry.company;
+        const record = getCompanySummary(summary, company);
+        if (record) {
+            const armyKills = record["kills"];
+            entry["kpar"] = (entry["kills"] + entry["assists"]) / armyKills;
+        } else {
+            entry.kpar = 0.0;
+        }
+    }
 }
 
 function parseDateString(date_string) {
@@ -168,7 +230,7 @@ function parseDateString(date_string) {
 
 function rowColorFormatter(row) {
     const company = row.getData().company;
-    const faction = getCompanyFaction(companies, company);
+    const faction = getCompanyFaction(COMPANIES, company);
     if (faction) {
         const style = STYLES[faction]
         row.getElement().style.background = style.background;
@@ -285,6 +347,9 @@ async function setupTable(data) {
 }
 
 const warDropdown = document.getElementById("war-select");
+const companyAllButton = document.getElementById("btn-all");
+const company1Button = document.getElementById("btn-company1");
+const company2Button = document.getElementById("btn-company2");
 
 async function loadWars() {
     let data = await db.query(warSheet, warsQuery);
@@ -300,8 +365,55 @@ async function loadWars() {
     });
 }
 
-async function updateButtons(companies, styles) {
+async function getCompaniesAtWar(leaderboard) {
+    let companies = []
+    for (let row of leaderboard) {
+        if (!(row.company in companies)) {
+            companies.push(row.company);
+        }
 
+        if (companies.length == 2) {
+            return companies;
+        }
+    }
+    return companies;
+}
+
+async function getStylesForCompanies(companies) {
+    let styles = {}
+    for (let comp of companies) {
+        const faction = getCompanyFaction(COMPANIES, comp);
+        if (faction == "Covenant") {
+            styles[comp] = ["bg-yellow-600", "hover:bg-yellow-500", "active:bg-yellow-700"];
+        } else if (faction == "Marauder") {
+            styles[comp] = ["bg-green-600", "hover:bg-green-500", "active:bg-green-700"];
+        } else if (faction == "Syndicate") {
+            styles[comp] = ["bg-purple-600", "hover:bg-purple-500", "active:bg-purple-700"];
+        } else {
+            styles[comp] = ["bg-gray-600", "hover:bg-gray-500", "active:bg-gray-700"];
+        }
+    }
+    return styles;
+}
+
+async function updateButtons(comapnyNames, styles) {
+    const [company1Name, company2Name] = comapnyNames;
+
+    company1Button.textContent = company1Name;
+    company2Button.innerText = company2Name;
+
+    const buttons = [company1Button, company2Button, companyAllButton];
+
+    company1Button.classList.remove("bg-gray-600", "hover:bg-gray-500");
+    company1Button.classList.remove("bg-gray-600", "hover:bg-gray-500");
+
+    company1Button.classList.add(...styles[company1Name]);
+    company2Button.classList.add(...styles[company2Name]);
+
+    buttons.forEach(button => {
+        button.disabled = false;
+        button.classList.remove("cursor-not-allowed", "opacity-50");
+    });
 }
 
 async function parseArgs() {
@@ -318,10 +430,13 @@ async function onWarDropdownChange(event) {
     const companies = (await db.query(warSheet, "SELECT D, E WHERE A=" + warId))[0]
     const summary = await summarizeData(companies, data);
     const leaderboard = await dataAsRecords(data);
+    calculateKP(leaderboard, summary);
     const groups = await createGroupTables(leaderboard, groups_data);
+    const comapniesAtWar = await getCompaniesAtWar(leaderboard);
     setupTable(leaderboard);
     setupSummaryTable(summary);
     setupGrousTable(groups);
+    updateButtons(comapniesAtWar, await getStylesForCompanies(comapniesAtWar));
 }
 
 function setUpListeners() {
