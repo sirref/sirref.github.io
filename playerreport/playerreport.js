@@ -210,12 +210,14 @@ async function parseArgs() {
 async function setPlayer() {
     const args = await parseArgs();
     if (args.player) {
-        if (playerDrowndown) {
-            playerDrowndown.value = args.player;
-            playerDrowndown.dispatchEvent(new Event("change"));
+        const options = playerDrowndown.options;
+        for (let key in options) {
+            if (options[key].text.toLowerCase().includes(args.player.toLowerCase())) {
+                playerDrowndown.setValue(key);
+            }
         }
     }
 }
-fillPlayerSelect();
+await fillPlayerSelect();
 setPlayer();
 //setupTable();
