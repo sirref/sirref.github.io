@@ -56,6 +56,10 @@ const WARS_TABLE_HEADERS = [
         formatter: cell => cell.getValue().toLocaleString(undefined, { maximumFractionDigits: 0 })
     },
     {
+        title: "Company",
+        field: "company"
+    },
+    {
         title: "Win/Loss",
         field: "win"
     }
@@ -177,11 +181,11 @@ async function onPlayerSelectChanged(params) {
         }
     });
 }
-
+let playerDrowndown = null;
 async function fillPlayerSelect() {
 
     let players = await db.query(playersSheet, "SELECT A");
-    let playerDrowndown = new TomSelect('#player-select', {
+    playerDrowndown = new TomSelect('#player-select', {
         create: false,
         sortField: {
             field: "text",
@@ -195,5 +199,23 @@ async function fillPlayerSelect() {
     });
     playerDrowndown.refreshOptions(false); // Refresh without re-sorting
 }
+
+async function parseArgs() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+        player: params.get('player')
+    };
+}
+
+async function setPlayer() {
+    const args = await parseArgs();
+    if (args.player) {
+        if (playerDrowndown) {
+            playerDrowndown.value = args.player;
+            playerDrowndown.dispatchEvent(new Event("change"));
+        }
+    }
+}
 fillPlayerSelect();
+setPlayer();
 //setupTable();
