@@ -13,6 +13,14 @@ const WARS_TABLE_HEADERS = [
         formatter: cell => formatDateToMMDDYYYY(cell.getValue())
     },
     {
+        title: "Opponent",
+        field: "opponent",
+    },
+    {
+        title: "Territory",
+        field: "territory"
+    },
+    {
         title: "Rank",
         field: "rank",
         formatter: cell => cell.getValue().toLocaleString(undefined, { maximumFractionDigits: 0 })
@@ -46,14 +54,6 @@ const WARS_TABLE_HEADERS = [
         title: "Damage",
         field: "damage",
         formatter: cell => cell.getValue().toLocaleString(undefined, { maximumFractionDigits: 0 })
-    },
-    {
-        title: "Opponent",
-        field: "opponent",
-    },
-    {
-        title: "Territory",
-        field: "territory"
     },
     {
         title: "Win/Loss",
