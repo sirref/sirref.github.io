@@ -152,7 +152,7 @@ function addWarInfoToPlayerData(playerData, warsData) {
         if (row.warid) {
             row.opponent = getOpponent(row.company, warInfo);
             row.date = parseDateString(warInfo[1]);
-            row.win = warInfo[7];
+            row.win = warInfo[5] == row.company ? "Win" : "Loss";
             row.duration = warInfo[8];
             row.territory = warInfo[2];
         }
