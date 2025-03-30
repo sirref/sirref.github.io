@@ -97,6 +97,8 @@ const SUMMARY_COLUMNS = [
     }
 ];
 
+const GROUPS_SUMMARY_COLUMNS = []
+
 const GROUPS_COLUMNS = [
     { title: "Name", field: "name" },
     {
@@ -258,6 +260,37 @@ function formatDateToMMDDYYYY(date) {
     return `${formattedMonth}/${formattedDay}/${year}`;
 }
 
+async function summarizeGroups(groups) {
+    let groups_summary = [];
+
+    for (let i of Object.keys(groups)) {
+        const group = groups[i];
+
+        let summary = {
+            "name": `Group ${i}`,
+            "score": 0,
+            "kills": 0,
+            "deaths": 0,
+            "assists": 0,
+            "healing": 0,
+            "damage": 0,
+            "kpar": 0.0
+        };
+
+        for (let entry of group) {
+            summary["score"] += entry.score;
+            summary["kills"] += entry.kills;
+            summary["deaths"] += entry.deaths;
+            summary["assists"] += entry.assists;
+            summary["healing"] += entry.healing;
+            summary["damage"] += entry.damage;
+            summary["kpar"] += entry.kpar / group.length;
+        }
+        groups_summary.push(summary);
+    }
+    return groups_summary;
+}
+
 function summarizeData(companies, leaderboard) {
     let summary = {}
     for (let company of companies) {
@@ -345,6 +378,13 @@ async function setupSummaryTable(data) {
     });
 }
 
+async function setupGroupsSummaryTable(data) {
+    new Tabulator("#groups-summary-table", {
+        data: data,
+        layout: "fitColumns",
+        columns: GROUPS_COLUMNS,
+    });
+}
 // Use an async function to await data
 async function setupTable(data) {
     leaderboardTable = new Tabulator("#leaderboard-table", {
@@ -377,7 +417,7 @@ async function loadWars() {
 async function getCompaniesAtWar(leaderboard) {
     let companies = []
     for (let row of leaderboard) {
-        if (!(row.company in companies)) {
+        if (!(companies.includes(row.company))) {
             companies.push(row.company);
         }
 
@@ -437,6 +477,12 @@ async function updateButtons(comapnyNames, styles) {
     });
 }
 
+function setURLParameter(key, value) {
+    const url = new URL(window.location);
+    url.searchParams.set(key, value); // add or update the parameter
+    history.pushState({}, '', url);   // or use replaceState to not add to history
+}
+
 async function parseArgs() {
     const params = new URLSearchParams(window.location.search);
     return {
@@ -446,6 +492,7 @@ async function parseArgs() {
 
 async function onWarDropdownChange(event) {
     const warId = event.target.value;
+    setURLParameter("wid", warId);
     const data = await db.query(leadboardSheet, leadboardQuery.replace("{warId}", warId));
     const groups_data = await db.query(groupsSheet, "SELECT A, B, C WHERE B=" + warId);
     const companies = (await db.query(warSheet, "SELECT D, E WHERE A=" + warId))[0]
@@ -453,9 +500,11 @@ async function onWarDropdownChange(event) {
     const leaderboard = await dataAsRecords(data);
     calculateKP(leaderboard, summary);
     const groups = await createGroupTables(leaderboard, groups_data);
+    const groupsSummary = await summarizeGroups(groups);
     const comapniesAtWar = await getCompaniesAtWar(leaderboard);
     setupTable(leaderboard);
     setupSummaryTable(summary);
+    setupGroupsSummaryTable(groupsSummary);
     setupGrousTable(groups);
     updateButtons(comapniesAtWar, await getStylesForCompanies(comapniesAtWar));
 }
