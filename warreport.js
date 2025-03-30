@@ -509,8 +509,13 @@ async function onWarDropdownChange(event) {
     updateButtons(comapniesAtWar, await getStylesForCompanies(comapniesAtWar));
 }
 
+function onWindowPopState() {
+    setWar();
+}
+
 function setUpListeners() {
     warDropdown.addEventListener("change", onWarDropdownChange)
+    window.addEventListener("popstate", onWindowPopState)
 }
 
 async function setWar() {
