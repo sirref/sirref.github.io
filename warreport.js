@@ -68,6 +68,7 @@ const LEADERBOARD_COLUMNS = [
 
 const SUMMARY_COLUMNS = [
     { title: "Company", field: "company" },
+    { title: "Players", field: "players" },
     { title: "Kills", field: "kills" },
     { title: "Deaths", field: "deaths" },
     {
@@ -296,6 +297,7 @@ function summarizeData(companies, leaderboard) {
     for (let company of companies) {
         summary[company] = {
             "company": company,
+            "players": 0,
             "kills": 0,
             "deaths": 0,
             "assists": 0,
@@ -307,6 +309,7 @@ function summarizeData(companies, leaderboard) {
     }
     for (let row of leaderboard) {
         const company = row[8];
+        summary[company]["players"] += 1;
         summary[company]["kills"] += row[3];
         summary[company]["deaths"] += row[4];
         summary[company]["assists"] += row[5];
