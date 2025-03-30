@@ -332,12 +332,14 @@ async function createGroupTables(leaderboard, groups) {
     for (let row of leaderboard) {
         const player = row.name;
         for (let entry of groups) {
-            if (entry[0].toLowerCase() == player.toLowerCase()) {
-                const group_nb = entry[2];
-                if (!(group_nb in tables)) {
-                    tables[group_nb] = []
+            if (entry[0] != undefined) {
+                if (entry[0].toLowerCase() == player.toLowerCase()) {
+                    const group_nb = entry[2];
+                    if (!(group_nb in tables)) {
+                        tables[group_nb] = []
+                    }
+                    tables[group_nb].push(row);
                 }
-                tables[group_nb].push(row);
             }
         }
     }
