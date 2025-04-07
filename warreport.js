@@ -279,13 +279,15 @@ async function summarizeGroups(groups) {
         };
 
         for (let entry of group) {
-            summary["score"] += entry.score;
-            summary["kills"] += entry.kills;
-            summary["deaths"] += entry.deaths;
-            summary["assists"] += entry.assists;
-            summary["healing"] += entry.healing;
-            summary["damage"] += entry.damage;
-            summary["kpar"] += entry.kpar / group.length;
+            if (entry.name) {
+                summary["score"] += entry.score;
+                summary["kills"] += entry.kills;
+                summary["deaths"] += entry.deaths;
+                summary["assists"] += entry.assists;
+                summary["healing"] += entry.healing;
+                summary["damage"] += entry.damage;
+                summary["kpar"] += entry.kpar / group.length;
+            }
         }
         groups_summary.push(summary);
     }
