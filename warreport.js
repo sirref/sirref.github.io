@@ -8,6 +8,40 @@ const groupsSheet = "groups"
 const db = new GSDB(sheetId);
 
 const COMPANIES = await db.query(companiesSheet, "SELECT A, B WHERE A IS NOT NULL");
+// const ROLE_ORDER = [
+//     { name: "AoE Healer", order: 0, color: "#A7F3D0" },   // Soft mint
+//     { name: "ST Healer", order: 1, color: "#BBF7D0" },    // Light green
+//     { name: "Bruiser", order: 2, color: "#FBD38D" },      // Warm light orange
+//     { name: "VGIG", order: 3, color: "#DDD6FE" },         // Light lavender
+//     { name: "Flail", order: 4, color: "#CBD5E1" },        // Light gray-blue
+//     { name: "Tank", order: 5, color: "#BFDBFE" },         // Light blue
+//     { name: "Caller", order: 6, color: "#E9D5FF" },       // Light purple
+//     { name: "Bow", order: 7, color: "#C7F9CC" },          // Very light green
+//     { name: "Disruptor", order: 8, color: "#FECACA" },    // Soft pink
+//     { name: "Firestaff", order: 9, color: "#FED7AA" },    // Light orange
+//     { name: "Holder", order: 10, color: "#BFDBFE" },      // Same light blue (for defense role)
+//     { name: "Quad Melee", order: 11, color: "#FCA5A5" },  // Light red
+//     { name: "Quad Range", order: 12, color: "#BAE6FD" },  // Light sky blue
+//     { name: "Sender", order: 13, color: "#FDE68A" },      // Light yellow
+// ];
+const ROLE_ORDER = [
+    { name: "AoE Healer", order: 0, color: "#5EEAD4" },   // Bright aqua
+    { name: "ST Healer", order: 1, color: "#6EE7B7" },    // Light saturated green
+    { name: "Bruiser", order: 2, color: "#F6AD55" },      // Soft vivid orange
+    { name: "VGIG", order: 3, color: "#C4B5FD" },         // Light violet
+    { name: "Flail", order: 4, color: "#A5B4FC" },        // Light saturated blue
+    { name: "Tank", order: 5, color: "#93C5FD" },         // Lighter blue
+    { name: "Caller", order: 6, color: "#D8B4FE" },       // Light purple
+    { name: "Bow", order: 7, color: "#86EFAC" },          // Bright green
+    { name: "Disruptor", order: 8, color: "#FCA5A5" },    // Bright coral
+    { name: "Firestaff", order: 9, color: "#FDBA74" },    // Warm orange
+    { name: "Holder", order: 10, color: "#7DD3FC" },      // Light cyan blue
+    { name: "Quad Melee", order: 11, color: "#F87171" },  // Bright soft red
+    { name: "Quad Range", order: 12, color: "#60A5FA" },  // Clean mid-light blue
+    { name: "Sender", order: 13, color: "#FCD34D" },      // Bright yellow
+];
+
+
 
 const leadboardQuery = "SELECT D, B, E, F, G, H, I, J, K where C={warId}";
 const TABLE_HEADER = ["rank", "name", "score", "kills", "deaths", "assists", "healing", "damage", "company"];
@@ -102,6 +136,7 @@ const GROUPS_SUMMARY_COLUMNS = []
 
 const GROUPS_COLUMNS = [
     { title: "Name", field: "name" },
+    { title: "Role", field: "role" },
     {
         title: "Score",
         field: "score",
@@ -240,6 +275,15 @@ function parseDateString(date_string) {
     }
 }
 
+function groupsRowFormatter(row) {
+    const role = row.getData().role;
+    for (let r of ROLE_ORDER) {
+        if (r.name == role) {
+            row.getElement().style.background = r.color;
+        }
+    }
+}
+
 function rowColorFormatter(row) {
     const company = row.getData().company;
     const faction = getCompanyFaction(COMPANIES, company);
@@ -371,7 +415,8 @@ async function setupGrousTable(data) {
         new Tabulator(tableName, {
             data: tableData,
             layout: "fitColumns",
-            columns: GROUPS_COLUMNS
+            columns: GROUPS_COLUMNS,
+            rowFormatter: groupsRowFormatter
         });
     }
 }
@@ -496,17 +541,51 @@ async function parseArgs() {
         warId: params.get('wid')
     };
 }
+function addRoleToLeaderboard(leaderboard, groupsData) {
+    for (let entry of leaderboard) {
+        for (let gd of groupsData) {
+            if (entry.name == gd[0]) {
+                entry.role = gd[4];
+            }
+        }
+    }
+}
+function orderGroups(groups) {
+    for (let k of Object.keys(groups)) {
+        groups[k].sort((a, b) => {
+            let aorder = 0;
+            let border = 0;
+            for (let r of ROLE_ORDER) {
+                if (a.role == r.name) {
+                    aorder = r.order;
+                    break;
+                }
+            }
 
+            for (let r of ROLE_ORDER) {
+                if (b.role == r.name) {
+                    border = r.order;
+                    break;
+                }
+            }
+
+            return aorder - border;
+
+        });
+    }
+}
 async function onWarDropdownChange(event) {
     const warId = event.target.value;
     setURLParameter("wid", warId);
     const data = await db.query(leadboardSheet, leadboardQuery.replace("{warId}", warId));
-    const groups_data = await db.query(groupsSheet, "SELECT A, B, C WHERE B=" + warId);
+    const groups_data = await db.query(groupsSheet, "SELECT A, B, C, D, E WHERE B=" + warId);
     const companies = (await db.query(warSheet, "SELECT D, E WHERE A=" + warId))[0]
     const summary = await summarizeData(companies, data);
     const leaderboard = await dataAsRecords(data);
+    addRoleToLeaderboard(leaderboard, groups_data);
     calculateKP(leaderboard, summary);
     const groups = await createGroupTables(leaderboard, groups_data);
+    orderGroups(groups);
     const groupsSummary = await summarizeGroups(groups);
     const comapniesAtWar = await getCompaniesAtWar(leaderboard);
     setupTable(leaderboard);
