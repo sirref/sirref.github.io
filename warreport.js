@@ -69,6 +69,7 @@ const NULL_GROUPS = {
 const STYLES = { "Covenant": COVENANT_STYLE, "Marauder": MARAUDER_STYLE, "Syndicate": SYNDICATE_STYLE };
 const LEADERBOARD_COLUMNS = [
     { title: "Rank", field: "rank" },
+    { title: "Role", field: "role" },
     { title: "Name", field: "name" },
     {
         title: "Score",
@@ -132,7 +133,59 @@ const SUMMARY_COLUMNS = [
     }
 ];
 
-const GROUPS_SUMMARY_COLUMNS = []
+const GROUPS_SUMMARY_COLUMNS = [
+    { title: "Name", field: "name" },
+    {
+        title: "Score",
+        field: "score",
+        formatter: cell => cell.getValue().toLocaleString(undefined, { maximumFractionDigits: 0 }),
+        bottomCalc: bottomCalcFunction,
+        bottomCalcParams: { function: "sum" }
+    },
+    {
+        title: "Kills",
+        field: "kills",
+        bottomCalc: bottomCalcFunction,
+        bottomCalcParams: { function: "sum" }
+    },
+    {
+        title: "Deaths",
+        field: "deaths",
+        bottomCalc: bottomCalcFunction,
+        bottomCalcParams: { function: "sum" }
+    },
+    {
+        title: "Assists",
+        field: "assists",
+        bottomCalc: bottomCalcFunction,
+        bottomCalcParams: { function: "sum" }
+    },
+    {
+        title: "Healing",
+        field: "healing",
+        formatter: cell => cell.getValue().toLocaleString(undefined, { maximumFractionDigits: 0 }),
+        bottomCalc: bottomCalcFunction,
+        bottomCalcParams: { function: "sum" }
+    },
+    {
+        title: "Damage",
+        field: "damage",
+        formatter: cell => cell.getValue().toLocaleString(undefined, { maximumFractionDigits: 0 }),
+        bottomCalc: bottomCalcFunction,
+        bottomCalcParams: { function: "sum" }
+    },
+    {
+        title: "KP",
+        field: "kpar",
+        formatter: cell => cell.getValue().toLocaleString(undefined, {
+            style: 'percent',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }),
+        bottomCalc: bottomCalcFunction,
+        bottomCalcParams: { function: "mean" }
+    }
+];
 
 const GROUPS_COLUMNS = [
     { title: "Name", field: "name" },
@@ -434,7 +487,7 @@ async function setupGroupsSummaryTable(data) {
     new Tabulator("#groups-summary-table", {
         data: data,
         layout: "fitColumns",
-        columns: GROUPS_COLUMNS,
+        columns: GROUPS_SUMMARY_COLUMNS,
     });
 }
 // Use an async function to await data
@@ -451,6 +504,7 @@ const warDropdown = document.getElementById("war-select");
 const companyAllButton = document.getElementById("btn-all");
 const company1Button = document.getElementById("btn-company1");
 const company2Button = document.getElementById("btn-company2");
+const roleDropown = document.getElementById("role-select");
 
 async function loadWars() {
     let data = await db.query(warSheet, warsQuery);
@@ -599,9 +653,17 @@ function onWindowPopState() {
     setWar();
 }
 
+function onRoleDropdownChange(event) {
+    const role = event.target.value;
+    if (leaderboardTable) {
+        leaderboardTable.setFilter("role", "=", role);
+    }
+}
+
 function setUpListeners() {
-    warDropdown.addEventListener("change", onWarDropdownChange)
-    window.addEventListener("popstate", onWindowPopState)
+    warDropdown.addEventListener("change", onWarDropdownChange);
+    window.addEventListener("popstate", onWindowPopState);
+    roleDropown.addEventListener("change", onRoleDropdownChange);
 }
 
 async function setWar() {
@@ -612,8 +674,17 @@ async function setWar() {
     }
 }
 
+function rolesDropdown() {
+    ROLE_ORDER.forEach(role => {
+        const option = document.createElement("option");
+        option.value = role.name
+        option.textContent = role.name;
+        roleDropown.appendChild(option);
+    })
+}
 setUpListeners();
 await loadWars();
+rolesDropdown();
 setupTable(null);
 setupSummaryTable(null)
 setupGrousTable(NULL_GROUPS)
