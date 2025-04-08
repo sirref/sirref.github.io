@@ -32,7 +32,7 @@ const ROLE_ORDER = [
     { name: "Flail", order: 4, color: "#A5B4FC" },        // Light saturated blue
     { name: "Tank", order: 5, color: "#93C5FD" },         // Lighter blue
     { name: "Caller", order: 6, color: "#D8B4FE" },       // Light purple
-    { name: "Bow", order: 7, color: "#86EFAC" },          // Bright green
+    { name: "Bow", order: 7, color: "#60A5FA" },          // Bright green
     { name: "Disruptor", order: 8, color: "#FCA5A5" },    // Bright coral
     { name: "Firestaff", order: 9, color: "#FDBA74" },    // Warm orange
     { name: "Holder", order: 10, color: "#7DD3FC" },      // Light cyan blue
