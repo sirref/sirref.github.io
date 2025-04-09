@@ -27,19 +27,20 @@ const COMPANIES = await db.query(companiesSheet, "SELECT A, B WHERE A IS NOT NUL
 const ROLE_ORDER = [
     { name: "AoE Healer", order: 0, color: "#A7F3D0" },   // Soft aqua green
     { name: "ST Healer", order: 1, color: "#BBF7D0" },    // Light mint green
-    { name: "Bruiser", order: 2, color: "#FCD34D" },      // Pastel gold
+    { name: "Bruiser", order: 2, color: "#FBBF24" },      // Light orange
     { name: "VGIG", order: 3, color: "#DDD6FE" },         // Soft lavender
     { name: "Flail", order: 4, color: "#C7D2FE" },        // Soft sky blue
     { name: "Tank", order: 5, color: "#BFDBFE" },         // Light blue
     { name: "Caller", order: 6, color: "#E9D5FF" },       // Light purple
-    { name: "Bow", order: 7, color: "#93C5FD" },          // Gentle blue
-    { name: "Disruptor", order: 8, color: "#93C5FD" },    // Light coral pink
-    { name: "Firestaff", order: 9, color: "#FCD5CE" },    // Soft peach
-    { name: "Holder", order: 10, color: "#93C5FD" },      // Light cyan
-    { name: "Quad Melee", order: 11, color: "#A5B4FC" },  // Light pinkish red
-    { name: "Quad Range", order: 12, color: "#FCA5A5" },  // Light blue-violet
-    { name: "Sender", order: 13, color: "#93C5FD" },      // Pastel yellow
+    { name: "Bow", order: 7, color: "#FDE68A" },          // Yellow
+    { name: "Disruptor", order: 8, color: "#93C5FD" },    // Gentle blue (previous Bow color)
+    { name: "Firestaff", order: 9, color: "#FB923C" },    // Darker orange
+    { name: "Holder", order: 10, color: "#BAE6FD" },      // Light cyan
+    { name: "Quad Melee", order: 11, color: "#A5B4FC" },  // Light blue-violet (was Quad Range)
+    { name: "Quad Range", order: 12, color: "#FCA5A5" },  // Light pinkish red (was Quad Melee)
+    { name: "Sender", order: 13, color: "#93C5FD" },      // Gentle blue (old Bow color)
 ];
+
 
 
 
