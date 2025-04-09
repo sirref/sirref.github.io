@@ -25,21 +25,22 @@ const COMPANIES = await db.query(companiesSheet, "SELECT A, B WHERE A IS NOT NUL
 //     { name: "Sender", order: 13, color: "#FDE68A" },      // Light yellow
 // ];
 const ROLE_ORDER = [
-    { name: "AoE Healer", order: 0, color: "#5EEAD4" },   // Bright aqua
-    { name: "ST Healer", order: 1, color: "#6EE7B7" },    // Light saturated green
-    { name: "Bruiser", order: 2, color: "#F6AD55" },      // Soft vivid orange
-    { name: "VGIG", order: 3, color: "#C4B5FD" },         // Light violet
-    { name: "Flail", order: 4, color: "#A5B4FC" },        // Light saturated blue
-    { name: "Tank", order: 5, color: "#93C5FD" },         // Lighter blue
-    { name: "Caller", order: 6, color: "#D8B4FE" },       // Light purple
-    { name: "Bow", order: 7, color: "#60A5FA" },          // Bright green
-    { name: "Disruptor", order: 8, color: "#FCA5A5" },    // Bright coral
-    { name: "Firestaff", order: 9, color: "#FDBA74" },    // Warm orange
-    { name: "Holder", order: 10, color: "#7DD3FC" },      // Light cyan blue
-    { name: "Quad Melee", order: 11, color: "#F87171" },  // Bright soft red
-    { name: "Quad Range", order: 12, color: "#60A5FA" },  // Clean mid-light blue
-    { name: "Sender", order: 13, color: "#FCD34D" },      // Bright yellow
+    { name: "AoE Healer", order: 0, color: "#A7F3D0" },   // Soft aqua green
+    { name: "ST Healer", order: 1, color: "#BBF7D0" },    // Light mint green
+    { name: "Bruiser", order: 2, color: "#FCD34D" },      // Pastel gold
+    { name: "VGIG", order: 3, color: "#DDD6FE" },         // Soft lavender
+    { name: "Flail", order: 4, color: "#C7D2FE" },        // Soft sky blue
+    { name: "Tank", order: 5, color: "#BFDBFE" },         // Light blue
+    { name: "Caller", order: 6, color: "#E9D5FF" },       // Light purple
+    { name: "Bow", order: 7, color: "#93C5FD" },          // Gentle blue
+    { name: "Disruptor", order: 8, color: "#FECACA" },    // Light coral pink
+    { name: "Firestaff", order: 9, color: "#FCD5CE" },    // Soft peach
+    { name: "Holder", order: 10, color: "#BAE6FD" },      // Light cyan
+    { name: "Quad Melee", order: 11, color: "#FCA5A5" },  // Light pinkish red
+    { name: "Quad Range", order: 12, color: "#A5B4FC" },  // Light blue-violet
+    { name: "Sender", order: 13, color: "#FDE68A" },      // Pastel yellow
 ];
+
 
 
 
