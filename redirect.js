@@ -10,7 +10,7 @@ function OnDocumentKeydown(event) {
     } else if (event.code == 'KeyW') {
         window.location.href = './warreport.html';
     } else if (event.code == 'KeyP') {
-        window.location.href = './playerreport.html';
+        window.location.href = './playerreport/playerreport.html';
     }
 
 }

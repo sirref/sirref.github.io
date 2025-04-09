@@ -145,6 +145,79 @@ function getOpponent(playerCompany, warInfo) {
     return "";
 }
 
+function createCharts(playerData) {
+    let charts = {
+        'labels': [],
+        'score': [],
+        'kills': [],
+        'deaths': [],
+        'assists': [],
+        'healing': [],
+        'damage': []
+    }
+
+    for (let row of playerData) {
+        charts.labels.push(row.date);
+    }
+
+    for (let key of Object.keys(charts)) {
+        for (let row of playerData) {
+            charts[key].push(row[key]);
+        }
+    }
+
+    return charts
+}
+let scoresChart = null;
+function fillCharts(chartData) {
+    let scoreChart = document.getElementById("score-chart");
+    let ctx = scoreChart.getContext('2d');
+
+    const scoresData = chartData.score;
+
+    if (scoresChart) { scoresChart.destroy(); }
+    scoresChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartData.labels,
+            datasets: [{
+                label: 'Score',
+                data: scoresData,
+                borderColor: 'rgba(59, 130, 246, 1)', // Tailwind blue-500
+                backgroundColor: 'rgba(59, 130, 246, 1)',
+                tension: 0.3,
+                fill: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    labels: { color: '#ffffff' }
+                },
+                tooltip: {
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff',
+                    callbacks: {
+                        title: (tooltipItems) => tooltipItems[0].label, // Show X value in tooltip
+                        label: (tooltipItem) => `Score: ${tooltipItem.raw}` // Show Y value
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { display: false }, // Hide x-axis labels
+                    grid: { color: 'rgba(255, 255, 255, 0.2)' } // Optional: tweak grid color
+                },
+                y: {
+                    ticks: { color: 'rgba(255, 255, 255, 1)' },
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
 
 function addWarInfoToPlayerData(playerData, warsData) {
     for (let row of playerData) {
@@ -163,6 +236,9 @@ async function onPlayerSelectChanged(params) {
     const data = await getDataForPlayer(params);
     const warsData = await getDataForWar();
     addWarInfoToPlayerData(data, warsData);
+    const chartData = createCharts(data);
+    fillCharts(chartData);
+
     new Tabulator("#wars-table", {
         data: data,
         layout: "fitColumns",
@@ -180,6 +256,7 @@ async function onPlayerSelectChanged(params) {
             }
         }
     });
+
 }
 let playerDrowndown = null;
 async function fillPlayerSelect() {

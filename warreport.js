@@ -35,11 +35,12 @@ const ROLE_ORDER = [
     { name: "Bow", order: 7, color: "#FDE68A" },          // Yellow
     { name: "Disruptor", order: 8, color: "#93C5FD" },    // Gentle blue (old Bow color)
     { name: "Firestaff", order: 9, color: "#FB923C" },    // Darker orange
-    { name: "Holder", order: 10, color: "#BAE6FD" },      // Light cyan
+    { name: "Holder", order: 10, color: "#A5B4FC" },      // Same as Quad Melee (light blue-violet)
     { name: "Quad Melee", order: 11, color: "#A5B4FC" },  // Light blue-violet
     { name: "Quad Range", order: 12, color: "#FCA5A5" },  // Light pinkish red
     { name: "Sender", order: 13, color: "#93C5FD" },      // Gentle blue
 ];
+
 
 
 
