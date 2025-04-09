@@ -33,12 +33,12 @@ const ROLE_ORDER = [
     { name: "Tank", order: 5, color: "#BFDBFE" },         // Light blue
     { name: "Caller", order: 6, color: "#E9D5FF" },       // Light purple
     { name: "Bow", order: 7, color: "#93C5FD" },          // Gentle blue
-    { name: "Disruptor", order: 8, color: "#FECACA" },    // Light coral pink
+    { name: "Disruptor", order: 8, color: "#93C5FD" },    // Light coral pink
     { name: "Firestaff", order: 9, color: "#FCD5CE" },    // Soft peach
-    { name: "Holder", order: 10, color: "#BAE6FD" },      // Light cyan
-    { name: "Quad Melee", order: 11, color: "#FCA5A5" },  // Light pinkish red
-    { name: "Quad Range", order: 12, color: "#A5B4FC" },  // Light blue-violet
-    { name: "Sender", order: 13, color: "#FDE68A" },      // Pastel yellow
+    { name: "Holder", order: 10, color: "#93C5FD" },      // Light cyan
+    { name: "Quad Melee", order: 11, color: "#A5B4FC" },  // Light pinkish red
+    { name: "Quad Range", order: 12, color: "#FCA5A5" },  // Light blue-violet
+    { name: "Sender", order: 13, color: "#93C5FD" },      // Pastel yellow
 ];
 
 
