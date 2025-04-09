@@ -472,7 +472,7 @@ async function setupGrousTable(data) {
         const tableData = data[group];
         const gt = new Tabulator(tableName, {
             data: tableData,
-            layout: "fitColumns",
+            layout: "fitDataFill",
             columns: GROUPS_COLUMNS,
             rowFormatter: groupsRowFormatter
         });
