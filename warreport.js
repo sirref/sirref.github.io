@@ -25,21 +25,29 @@ const COMPANIES = await db.query(companiesSheet, "SELECT A, B WHERE A IS NOT NUL
 //     { name: "Sender", order: 13, color: "#FDE68A" },      // Light yellow
 // ];
 const ROLE_ORDER = [
-    { name: "AoE Healer", order: 0, color: "#22C55E", icon: "✿" },   // Darker but fresh green (flower symbol)
-    { name: "ST Healer", order: 1, color: "#6EE7B7", icon: "⚕️" },    // Light saturated green (medical symbol)
-    { name: "Hammer", order: 2, color: "#FDBA74", icon: "⛏️" },      // Hammer (pickaxe symbol)
-    { name: "Icecube", order: 3, color: "#C4B5FD", icon: "❄️" },         // Icecube (snowflake symbol)
-    { name: "Mace", order: 4, color: "#A5B4FC", icon: "⚒️" },        // Mace (hammer and pick)
-    { name: "Tank", order: 5, color: "#93C5FD", icon: "🛡️" },         // Lighter blue (shield symbol)
-    { name: "Caller", order: 6, color: "#FACC15", icon: "📢" },       // Golden color (megaphone symbol)
-    { name: "Bow", order: 7, color: "#FCD34D", icon: "➳" },          // Bright yellow (arrow symbol)
-    { name: "Disruptor", order: 8, color: "#FCA5A5", icon: "⚡" },    // Bright coral (lightning bolt symbol)
-    { name: "Firestaff", order: 9, color: "#EA580C", icon: "🔥" },    // Dark orange (flame symbol)
-    { name: "Holder", order: 10, color: "#F87171", icon: "✋" },      // Same as Quad Melee (raised hand symbol)
-    { name: "Quad Melee", order: 11, color: "#F87171", icon: "⚔️" },  // Bright soft red (crossed swords symbol)
-    { name: "Quad Range", order: 12, color: "#60A5FA", icon: "🎯" },  // Clean mid-light blue (dartboard symbol)
-    { name: "Sender", order: 13, color: "#93C5FD", icon: "✉️" },      // Lighter blue (envelope symbol)
+    { name: "AoE Healer", order: 0, color: "#22C55E" },   // Darker but fresh green
+    { name: "ST Healer", order: 1, color: "#6EE7B7" },    // Light saturated green
+    { name: "Bruiser", order: 2, color: "#FDBA74" },      // Light orange
+    { name: "VGIG", order: 3, color: "#C4B5FD" },         // Light violet
+    { name: "Flail", order: 4, color: "#A5B4FC" },        // Light saturated blue
+    { name: "Tank", order: 5, color: "#93C5FD" },         // Lighter blue
+    { name: "Caller", order: 6, color: "#FACC15" },       // Golden color (bright yellow gold)
+    { name: "Bow", order: 7, color: "#FCD34D" },          // Bright yellow
+    { name: "Disruptor", order: 8, color: "#FCA5A5" },    // Bright coral
+    { name: "Firestaff", order: 9, color: "#EA580C" },    // Dark orange
+    { name: "Holder", order: 10, color: "#F87171" },      // Same as Quad Melee
+    { name: "Quad Melee", order: 11, color: "#F87171" },  // Bright soft red
+    { name: "Quad Range", order: 12, color: "#60A5FA" },  // Clean mid-light blue
+    { name: "Sender", order: 13, color: "#93C5FD" },      // Lighter blue (same as Tank)
 ];
+
+
+
+
+
+
+
+
 
 const leadboardQuery = "SELECT D, B, E, F, G, H, I, J, K where C={warId}";
 const TABLE_HEADER = ["rank", "name", "score", "kills", "deaths", "assists", "healing", "damage", "company"];
