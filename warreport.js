@@ -41,14 +41,6 @@ const ROLE_ORDER = [
     { name: "Sender", order: 13, color: "#93C5FD" },      // Lighter blue (same as Tank)
 ];
 
-
-
-
-
-
-
-
-
 const leadboardQuery = "SELECT D, B, E, F, G, H, I, J, K where C={warId}";
 const TABLE_HEADER = ["rank", "name", "score", "kills", "deaths", "assists", "healing", "damage", "company"];
 const SUMMARY_HEADER = ["company", "kills", "deaths", "assists", "healing", "damage", "dpk", "apk"];
@@ -468,9 +460,12 @@ async function createGroupTables(leaderboard, groups) {
 
 
 async function setupGrousTable(data) {
-    for (let group of Object.keys(data)) {
-        const tableName = `#group-${group}`;
-        const tableData = data[group];
+    for (let i = 1; i <= 12; i++) {
+        const tableName = `#group-${i}`;
+        let tableData = {};
+        if (i in data) {
+            tableData = data[i];
+        }
         const gt = new Tabulator(tableName, {
             data: tableData,
             layout: "fitDataFill",
@@ -573,17 +568,18 @@ async function onCompanyButtonClicked(event) {
 
 async function updateButtons(comapnyNames, styles) {
     const [company1Name, company2Name] = comapnyNames;
-
-    company1Button.textContent = company1Name;
-    company2Button.innerText = company2Name;
+    if (company1Name in styles) {
+        company1Button.textContent = company1Name;
+        company1Button.classList.remove("bg-gray-600", "hover:bg-gray-500");
+        company1Button.classList.add(...styles[company1Name]);
+    }
+    if (company2Name in styles) {
+        company2Button.textContent = company2Name;
+        company2Button.classList.remove("bg-gray-600", "hover:bg-gray-500");
+        company2Button.classList.add(...styles[company2Name]);
+    }
 
     const buttons = [company1Button, company2Button, companyAllButton];
-
-    company1Button.classList.remove("bg-gray-600", "hover:bg-gray-500");
-    company1Button.classList.remove("bg-gray-600", "hover:bg-gray-500");
-
-    company1Button.classList.add(...styles[company1Name]);
-    company2Button.classList.add(...styles[company2Name]);
 
     buttons.forEach(button => {
         button.disabled = false;
