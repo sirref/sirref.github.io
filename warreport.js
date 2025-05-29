@@ -441,9 +441,9 @@ async function createGroupTables(leaderboard, groups) {
         }
     }
 
-    // Check for tables with 4 rows and add a dummy last row
+    // Check for tables with fewer than rows and add a dummy last row
     for (let t of Object.keys(tables)) {
-        if (tables[t].length == 4) {
+        if (tables[t].length < 5) {
             let lastRowCopy = { ...tables[t].slice(-1)[0] };  // Make a copy of the last row
 
             // Clear the data in the last row copy
