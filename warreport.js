@@ -443,15 +443,17 @@ async function createGroupTables(leaderboard, groups) {
 
     // Check for tables with fewer than rows and add a dummy last row
     for (let t of Object.keys(tables)) {
-        while (tables[t].length < 5) {
-            let lastRowCopy = { ...tables[t].slice(-1)[0] };  // Make a copy of the last row
+        if (t <= 10) {
+            while (tables[t].length < 5) {
+                let lastRowCopy = { ...tables[t].slice(-1)[0] };  // Make a copy of the last row
 
-            // Clear the data in the last row copy
-            for (let key in lastRowCopy) {
-                lastRowCopy[key] = ""; // Set each column's value to an empty string
+                // Clear the data in the last row copy
+                for (let key in lastRowCopy) {
+                    lastRowCopy[key] = ""; // Set each column's value to an empty string
+                }
+
+                tables[t].push(lastRowCopy);  // Add the dummy last row to the table
             }
-
-            tables[t].push(lastRowCopy);  // Add the dummy last row to the table
         }
     }
 
@@ -612,6 +614,11 @@ function addRoleToLeaderboard(leaderboard, groupsData) {
 function orderGroups(groups) {
     for (let k of Object.keys(groups)) {
         groups[k].sort((a, b) => {
+            if (a.name === '') {
+                return 1;
+            } else if (b.name === '') {
+                return -1;
+            }
             let aorder = 0;
             let border = 0;
             for (let r of ROLE_ORDER) {
